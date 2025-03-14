@@ -1,12 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { Header, MainContent } from "./App";
+import { Header, MainContent, Courses } from "./App";
 import "./index.css";
 
 const App = () => (
     <>
         <Header />
         <MainContent />
+        <Courses />
     </>
 );
 
