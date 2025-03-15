@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { Header, MainContent, Courses } from "./App";
+import {Header, MainContent, Courses, Advantages, FAQ, OrderForm, Footer} from "./App";
 import "./index.css";
 
 const App = () => (
@@ -8,6 +8,10 @@ const App = () => (
         <Header />
         <MainContent />
         <Courses />
+        <Advantages/>
+        <FAQ/>
+        <OrderForm/>
+        <Footer/>
     </>
 );
 

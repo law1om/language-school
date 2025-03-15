@@ -4,14 +4,13 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import './App.css'
-
-import { useEffect } from "react";
+import { useState, useEffect, useRef} from "react";
 
 const Header = () =>  (
     <header className="header">
         <div className="container">
             <div className="logo">
-                <img src="" alt="logo" />
+                <img src="/logo.svg" alt="logo" />
             </div>
             <nav className="menu">
                 <ul className="menu_list">
@@ -120,22 +119,24 @@ const courses = [
 const Courses = () => {
     return (
         <section className="courses">
+            <img src="/line2.svg" alt="Line" className="line2"/>
             <div className="common-title">Выберите программу</div>
             <div className="container">
+
                 <Swiper
                     modules={[Navigation, Pagination, Autoplay]}
                     spaceBetween={30}
                     slidesPerView={3}
                     loop={true}
-                    autoplay={{ delay: 2500, disableOnInteraction: false }}
+                    autoplay={{delay: 2500, disableOnInteraction: false}}
                     navigation
-                    pagination={{ clickable: true }}
+                    pagination={{clickable: true}}
                 >
                     {courses.map((course) => (
                         <SwiperSlide key={course.id}>
                             <div className="course-card">
                                 <div className="course-image">
-                                    <img src={course.image} alt={course.title} />
+                                    <img src={course.image} alt={course.title}/>
                                 </div>
                                 <div className="course-details">
                                     <h3 className="course-title">{course.title}</h3>
@@ -157,4 +158,136 @@ const Courses = () => {
 };
 
 
-export {Header, MainContent, Courses };
+const advantages = [
+    {id: 1, title: "Опытные преподаватели", icon: "👨‍🏫" },
+    { id: 2, title: "Живое общение", icon: "💬" },
+    { id: 3, title: "Методики мирового уровня", icon: "🧠" },
+    { id: 4, title: "Подготовка к экзаменам", icon: "📝" },
+
+];
+
+const Advantages = () => {
+    const sectionRef = useRef(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("show");
+                    }
+                });
+            },
+            { threshold: 0.3 }
+        );
+
+        const cards = sectionRef.current.querySelectorAll(".card");
+        cards.forEach((card) => observer.observe(card));
+
+        return () => observer.disconnect();
+    }, []);
+
+    return (
+
+        <section className="advantages" ref={sectionRef}>
+            <h2 className="common-title">Наши преимущества</h2>
+            <p className="description">
+                Наши курсы — это идеальное сочетание актуальных знаний, практического опыта и удобного формата обучения. Мы предлагаем качественные материалы, поддержку экспертов и обратную связь.
+            </p>
+            <div className="cards">
+                {advantages.map((adv) => (
+                    <div key={adv.id} className="card hidden">
+                        <span className="icon">{adv.icon}</span>
+                        <p>{adv.title}</p>
+                    </div>
+                ))}
+            </div>
+
+        </section>
+
+    );
+};
+
+
+
+const faqs = [
+    { question: "Какие языки можно изучать?", answer: "У нас есть курсы по английскому, немецкому, французскому, испанскому и итальянскому языкам." },
+    { question: "Как записаться на курс?", answer: "Вы можете оставить заявку на сайте, и наш менеджер свяжется с вами для уточнения деталей." },
+    { question: "Есть ли пробный урок?", answer: "Да, у нас есть пробные уроки, на которых вы можете познакомиться с преподавателем и методикой обучения." },
+    { question: "Как проходит обучение?", answer: "Обучение проходит онлайн или офлайн, в зависимости от вашего выбора. Включает в себя лекции, практику и разговорные клубы." },
+];
+
+const FAQ = () => {
+    const [openIndex, setOpenIndex] = useState(null);
+
+    const toggleFAQ = (index) => {
+        setOpenIndex(openIndex === index ? null : index);
+    };
+
+    return (
+        <section className="faq">
+            <h2 className="common-title">Часто задаваемые вопросы</h2>
+            <div className="container">
+                {faqs.map((faq, index) => (
+                    <div key={index} className={`faq-item ${openIndex === index ? "open" : ""}`}>
+                        <button className="faq-question" onClick={() => toggleFAQ(index)}>
+                            {faq.question}
+                            <span className="arrow">{openIndex === index ? "▲" : "▼"}</span>
+                        </button>
+                        <div className="faq-answer" style={{ maxHeight: openIndex === index ? "100px" : "0" }}>
+                            <p>{faq.answer}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </section>
+    );
+};
+
+
+
+const OrderForm = () => {
+    return (
+        <section className="order" id="order">
+            <img src="/line3.svg" alt="Line" className="line3" />
+            <div className="container">
+                <div className="common-title">Запишитесь на курс</div>
+                <div className="order-block">
+                    <div className="order-form">
+                        <div className="order-form-text">
+                            Начните изучение языка уже сегодня! Заполните форму, и наш менеджер свяжется с вами для консультации.
+                        </div>
+                        <div className="order-form-inputs">
+                            <input type="text" placeholder="Выберите язык" id="course" />
+                            <input type="text" placeholder="Ваше имя" id="name" />
+                            <input type="text" placeholder="Ваш телефон" id="phone" />
+                            <button className="button violet-button" id="order-action">Оставить заявку</button>
+                        </div>
+                    </div>
+                    <div className="order-block-image">
+                        <img src="/books.svg" alt="Languages" className="order-image" />
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+};
+
+const Footer = () => {
+    return (
+        <footer className="footer">
+            <div className="container">
+                <div className="footer-content">
+                    <div className="footer-text">
+                        KINGS COURSE
+                    </div>
+
+                </div>
+                <p className="rights">«Все права защищены»</p>
+            </div>
+        </footer>
+    );
+};
+
+
+export {Header, MainContent, Courses, Advantages, FAQ, OrderForm, Footer};
