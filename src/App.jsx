@@ -6,28 +6,39 @@ import "swiper/css/pagination";
 import './App.css'
 import { useState, useEffect, useRef} from "react";
 
-const Header = () =>  (
-    <header className="header">
-        <div className="container">
-            <div className="logo">
-                <img src="/logo.svg" alt="logo" />
+const Header = () => {
+    const scrollToSection = (e) => {
+        e.preventDefault();
+        const targetId = e.target.getAttribute('data-link');
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+            targetElement.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
+    return (
+        <header className="header">
+            <div className="container">
+                <div className="logo">
+                    <img src="/logo.svg" alt="logo" />
+                </div>
+                <nav className="menu">
+                    <ul className="menu_list">
+                        <li className="menu_item">
+                            <a href="#programs" data-link="programs" onClick={scrollToSection}>Программы</a>
+                        </li>
+                        <li className="menu_item">
+                            <a href="#about-us" data-link="about-us" onClick={scrollToSection}>О нас</a>
+                        </li>
+                        <li className="menu_item">
+                            <a href="#sign-up" data-link="sign-up" onClick={scrollToSection}>Записаться</a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
-            <nav className="menu">
-                <ul className="menu_list">
-                    <li className="menu_item">
-                        <a href="#programs" data-link="programs">Программы</a>
-                    </li>
-                    <li className="menu_item">
-                        <a href="#about-us" data-link="about-us">О нас</a>
-                    </li>
-                    <li className="menu_item">
-                        <a href="#sign-up" data-link="sign-up">Записаться</a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    </header>
-);
+        </header>
+    );
+};
 
 const MainContent = () => {
     useEffect(() => {
@@ -118,7 +129,7 @@ const courses = [
 
 const Courses = () => {
     return (
-        <section className="courses">
+        <section className="courses" id="programs">
             <img src="/line2.svg" alt="Line" className="line2"/>
             <div className="common-title">Выберите программу</div>
             <div className="container">
@@ -189,7 +200,7 @@ const Advantages = () => {
 
     return (
 
-        <section className="advantages" ref={sectionRef}>
+        <section className="advantages" id="about-us" ref={sectionRef}>
             <h2 className="common-title">Наши преимущества</h2>
             <p className="description">
                 Наши курсы — это идеальное сочетание актуальных знаний, практического опыта и удобного формата обучения. Мы предлагаем качественные материалы, поддержку экспертов и обратную связь.
@@ -248,7 +259,7 @@ const FAQ = () => {
 
 const OrderForm = () => {
     return (
-        <section className="order" id="order">
+        <section className="order" id="sign-up">
             <img src="/line3.svg" alt="Line" className="line3" />
             <div className="container">
                 <div className="common-title">Запишитесь на курс</div>
@@ -274,6 +285,13 @@ const OrderForm = () => {
 };
 
 const Footer = () => {
+    const scrollToTop = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    };
+    
     return (
         <footer className="footer">
             <div className="container">
@@ -281,9 +299,11 @@ const Footer = () => {
                     <div className="footer-text">
                         KINGS COURSE
                     </div>
-
+                    <button className="scroll-top" onClick={scrollToTop} aria-label="Прокрутить наверх">
+                        ↑
+                    </button>
                 </div>
-                <p className="rights">«Все права защищены»</p>
+                <p className="rights">© 2025 «Все права защищены»</p>
             </div>
         </footer>
     );

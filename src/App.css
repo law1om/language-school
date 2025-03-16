@@ -1,4 +1,3 @@
-
 .header{
   padding: 1px 0;
 
@@ -466,24 +465,68 @@
 
 
 
-.footer{
+.footer {
   text-align: center;
+  padding: 20px 0;
+  position: relative;
 }
 
-.rights{
+.footer-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.scroll-top {
+  position: absolute;
+  right: 0;
+  background: #5243F4;
+  border: none;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.scroll-top:hover {
+  background: #3b30ba;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.scroll-top:active {
+  transform: translateY(-1px);
+}
+
+.rights {
   margin-top: 14px;
   font-size: 18px;
   line-height: 130%;
-
 }
-.footer-text{
+
+.footer-text {
   font-family: "Steppe-ExtraBold", sans-serif;
   font-size: 18px;
-
 }
-.footer-contacts a{
+
+.footer-contacts a {
   color: white;
   text-decoration: none;
+}
+
+.back-to-top-container,
+.back-to-top-button,
+.back-to-top-button:hover,
+.back-to-top-button:active {
+  display: none;
 }
 
 
