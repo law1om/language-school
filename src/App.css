@@ -1,6 +1,6 @@
 .header{
-  padding: 1px 0;
-
+  padding: 20px 0;
+  margin-top: 80px;
 }
 
 .common-title{
@@ -55,8 +55,24 @@
 }
 
 .logo{
-  width: 50px;
+  width: auto;
 }
+
+.logo a {
+  text-decoration: none;
+}
+
+.logo-text {
+  font-family: "Steppe-ExtraBold", sans-serif;
+  font-size: 22px;
+  color: white;
+  letter-spacing: 1px;
+}
+
+.logo-text:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
 .logo img{
   vertical-align: bottom;
 }
@@ -116,88 +132,188 @@
 
 
 .courses {
-  padding: 80px 0 50px;
+  padding: 100px 0 0;
   text-align: center;
   position: relative;
-  overflow: visible;
-  max-width: 1000px;
+  overflow: hidden;
+  width: 80%;
   margin: 0 auto;
 }
 
-.courses-list {
-
-  display: flex;
-  gap: 30px;
-  justify-content: center;
-  flex-wrap: nowrap;
+.courses .container {
   overflow: visible;
+  padding: 50px 0;
 }
+
+.courses .swiper {
+  overflow: visible;
+  padding: 0 0 40px;
+  height: 540px;
+}
+
+.courses .swiper-slide {
+  height: auto;
+  padding-top: 30px;
+  overflow: visible;
+  display: flex;
+  justify-content: center;
+}
+
+.courses .swiper-pagination {
+  display: none
+}
+
+.courses .swiper-button-next,
+.courses .swiper-button-prev {
+  color: #111 !important;
+  margin-top: -60px;
+  transform: translateY(0);
+}
+
+.courses .swiper-button-next:hover,
+.courses .swiper-button-prev:hover {
+  color: #624bff !important;
+}
+
+.courses .swiper-button-next::after,
+.courses .swiper-button-prev::after {
+  margin-top: -30px;
+  font-size: 25px;
+  font-weight: 300;
+}
+
+.courses .swiper-button-prev {
+  left: -5px;
+}
+
+.courses .swiper-button-next {
+  right: -5px;
+}
+
 
 .course-card {
   background: white;
   border-radius: 10px;
-  padding: 100px 30px 30px 30px;
-  width: 320px;
+  padding: 80px 25px 25px 25px;
+  width: 300px;
   text-align: left;
   position: relative;
   overflow: visible;
-  min-height: 320px;
+  max-height: 300px;
+}
+
+.course-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
 .course-image {
-  position: absolute;
-  top: -40px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 110px;
-  height: auto;
-  z-index: 10;
-  overflow: visible;
-  pointer-events: none;
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: auto;
+    z-index: 10;
+    overflow: visible;
+    pointer-events: none;
 }
 
-
+.course-card:hover .course-image {
+  transform: translateX(-50%) translateY(-5px);
+}
 
 .course-image img {
   max-width: 100%;
-  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+  transition: transform 0.3s ease;
+}
+
+.course-details {
+  padding: 10px 0;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  height: 100%;
 }
 
 .course-title {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: bold;
-  margin: 15px 0;
+  margin-bottom: 15px;
   color: #333;
   text-align: center;
 }
 
 .course-description {
   font-size: 16px;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   color: #444;
 }
 
 .course-features {
   list-style: none;
   padding: 0;
+  margin-bottom: 45px;
   color: #555;
+  flex-grow: 1;
+  overflow-y: auto;
+  max-height: 200px;
+  padding-right: 5px;
+}
+
+.course-features::-webkit-scrollbar {
+  width: 4px;
+}
+
+.course-features::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.course-features::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
 }
 
 .course-features li {
   font-size: 14px;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
+  padding-left: 5px;
+  position: relative;
 }
 
 .courses .button {
   background: #624bff;
   color: white;
+  padding: 12px 24px;
+  width: auto;
+  height: auto;
+  border-radius: 25px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  outline: none;
   position: absolute;
-  bottom: 15px;
-  right: 15px;
+  right: 10px;
+  bottom: 10px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  min-width: 130px;
+  font-weight: 300;
 }
 
 .courses .button:hover {
   background: #5237e3;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .swiper {
@@ -208,8 +324,6 @@
   padding-top: 50px;
   margin: 0 auto;
 }
-
-
 
 .swiper-wrapper {
   display: flex;
@@ -230,13 +344,22 @@
   pointer-events: auto;
   color: #111;
   z-index: 16;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border-radius: 50%;
+  margin-top: -30px;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  color: #624bff;
 }
 
 .swiper-button-next::after,
 .swiper-button-prev::after {
-  font-size: 30px;
+  font-size: 18px;
+  font-weight: bold;
 }
 
 .swiper-button-prev {
@@ -252,7 +375,7 @@
 }
 
 .reviews {
-    padding: 102px 0;
+    padding: 0 0 70px;
     position: relative;
     color: white;
     overflow: visible;
@@ -272,7 +395,7 @@
 
 .reviews .description {
     max-width: 800px;
-    margin: 0 auto 50px;
+    margin: 0 auto 30px;
     text-align: center;
     font-size: 18px;
     line-height: 130%;
@@ -289,16 +412,16 @@
 .review-card {
     background: white;
     border-radius: 15px;
-    padding: 20px;
-    margin: 10px;
+    padding: 18px;
+    margin: 8px;
     transition: all 0.3s ease;
     height: 100%;
     color: #333;
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     opacity: 1;
     transform: none;
-    min-height: 200px;
-    max-height: 200px;
+    min-height: 180px;
+    max-height: 180px;
     display: flex;
     flex-direction: column;
 }
@@ -314,8 +437,8 @@
 }
 
 .review-avatar {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     margin-right: 10px;
     display: flex;
@@ -324,7 +447,7 @@
     background: #5243F4;
     color: white;
     font-weight: bold;
-    font-size: 18px;
+    font-size: 16px;
     flex-shrink: 0;
 }
 
@@ -352,7 +475,7 @@
 }
 
 .review-text {
-    font-size: 14px;
+    font-size: 13px;
     line-height: 130%;
     color: #444;
     margin: 0;
@@ -384,10 +507,7 @@
     color: #5243F4;
     width: 50px;
     height: 50px;
-    background: none;
-    border-radius: 50%;
     transition: all 0.3s ease;
-    box-shadow: none;
     z-index: 10;
     position: absolute;
     top: 50%;
@@ -395,23 +515,27 @@
 }
 
 .reviews .swiper-button-next {
-    right: 0;
+    right: -10px;
 }
 
 .reviews .swiper-button-prev {
-    left: 0;
+    left: -10px;
 }
 
 .reviews .swiper-button-next:hover,
 .reviews .swiper-button-prev:hover {
-    background: none;
-    box-shadow: none;
+    color: #3b30ba;
 }
 
 .reviews .swiper-button-next::after,
 .reviews .swiper-button-prev::after {
     font-size: 22px;
     font-weight: bold;
+}
+
+.reviews .swiper-button-disabled {
+    opacity: 0.3;
+    cursor: default;
 }
 
 .reviews .swiper-pagination {
@@ -464,15 +588,15 @@
   flex-grow: 1;
   background: white;
   color: black;
-  padding: 20px;
+  padding: 18px;
   border-radius: 10px;
-  width: 200px;
-  height: 180px;
+  width: 180px;
+  height: 160px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: bold;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.6s ease-out;
@@ -482,8 +606,8 @@
 
 
 .card .icon {
-  font-size: 40px;
-  margin-bottom: 10px;
+  font-size: 36px;
+  margin-bottom: 8px;
 }
 
 .line1{
@@ -494,18 +618,21 @@
 
 }
 
-.line2{
+.line2 {
   position: absolute;
   z-index: -1;
-  top: -40px;
-  right: 1px;
+  top: 1000px;
+  left: 0;
+  width: 100%;
+  max-width: none;
+
 }
 
 .line3{
   position: absolute;
   z-index: -1;
-  top: -1px;
-  left: 1px;
+  top: 2800px;
+  left: 0;
 
 }
 
@@ -567,11 +694,10 @@
 
 .order-block {
   margin-top: 60px;
-  background: rgb(255 255 255 /30%) ;
-  backdrop-filter: blur(50px);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
   display: flex;
   align-items: center;
-
 }
 
 .order-form {
@@ -593,24 +719,21 @@
   display: flex;
   flex-direction: column;
   margin-top: 20px;
+  width: 385px;
 }
 
 .order-form-inputs input {
-
   border: 1px solid white;
   border-radius: 60px;
-  margin-bottom: 16px;
   padding: 24px 22px 24px 22px;
   font-size: 18px;
-  width: 385px;
+  width: 100%;
   height: 68px;
   background: transparent;
   box-sizing: border-box;
   outline: none;
-  color: white;
-}
-::placeholder {
-  color: rgb(255, 255, 255, 0.4) ;
+  color: rgba(255, 255, 255, 0.9);
+  transition: border-color 0.3s ease;
 }
 
 .order-form-inputs .button.violet-button{
@@ -647,8 +770,9 @@
 }
 
 .scroll-top {
-  position: absolute;
-  right: 0;
+  position: fixed;
+  right: 30px;
+  bottom: 30px;
   background: #5243F4;
   border: none;
   width: 45px;
@@ -662,6 +786,7 @@
   align-items: center;
   transition: all 0.3s ease;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 999;
 }
 
 .scroll-top:hover {
@@ -690,27 +815,174 @@
   text-decoration: none;
 }
 
-.back-to-top-container,
-.back-to-top-button,
-.back-to-top-button:hover,
-.back-to-top-button:active {
+.input-group {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.input-group input.error {
+  border: 1px solid #ff4d4d;
+}
+
+.error-message {
+  color: #ff4d4d;
+  font-size: 12px;
+  margin-top: 5px;
+  position: absolute;
+  bottom: -20px;
+  left: 10px;
+  font-family: "Steppe-ExtraBold", sans-serif;
+}
+
+.order-form-inputs button:disabled {
+  background-color: #8a7df0;
+  cursor: default;
+}
+
+.order-form-inputs button:disabled:hover {
+  background-color: #8a7df0;
+}
+
+::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.phone-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.phone-prefix {
+  position: absolute;
+  left: 22px;
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.9);
+  z-index: 2;
+  font-family: monospace;
+}
+
+.phone-input-group input {
+  padding-left: 45px;
+  font-family: monospace;
+  letter-spacing: 0.5px;
+}
+
+.promo-banner {
+  background-color: #7a60ff;
+  height: 60px;
+  position: fixed;
+  top: 0;
+  left: 15px;
+  width: calc(100% - 30px);
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  border-radius: 30px;
+  margin-top: 0;
+}
+
+.promo-banner-inner {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  position: relative;
+}
+
+.promo-text {
+  font-family: "Steppe-ExtraBold", sans-serif;
+  font-size: 20px;
+  color: white;
+  text-align: left;
+}
+
+.promo-right-block {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.promo-timer {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 6px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.timer-label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-right: 8px;
+}
+
+.timer-value {
+  font-family: "Steppe-ExtraBold", sans-serif;
+  font-size: 16px;
+  color: white;
+  letter-spacing: 1px;
+}
+
+.promo-button {
+  background-color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 8px 18px;
+  font-family: "Steppe-Bold", sans-serif;
+  font-size: 14px;
+  color: #7a60ff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.promo-button:hover {
+  background-color: #f5f5f5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.banner-flower-left {
+  position: absolute;
+  height: 80px;
+  z-index: 2;
+  left: 130px;
+  top: -15px;
+  max-width: 80px;
+  object-fit: contain;
+  display: block;
+  border: 1px solid transparent;
+}
+
+.banner-flower-right {
+  position: absolute;
+  height: 80px;
+  right: 10px;
+  top: -20px;
+  z-index: 10;
+  max-width: 80px;
+  object-fit: contain;
+  display: block;
+  border: 1px solid transparent;
+}
+
+
+.courses-swiper,
+.courses-swiper .swiper-wrapper,
+.courses-swiper .swiper-slide,
+.courses-swiper .swiper-button-next,
+.courses-swiper .swiper-button-prev,
+.courses-swiper .swiper-button-next::after,
+.courses-swiper .swiper-button-prev::after {
   display: none;
 }
-
-/* Добавляем стили для экранов с шириной менее 768px */
-@media (max-width: 768px) {
-    .reviews .swiper {
-        max-width: 90%;
-    }
-    
-    .reviews .swiper-slide {
-        width: 100% !important;
-    }
-    
-    .reviews .swiper-button-next,
-    .reviews .swiper-button-prev {
-        display: none;
-    }
-}
-
-
