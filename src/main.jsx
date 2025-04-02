@@ -6,8 +6,11 @@ import "./index.css";
 const App = () => (
     <>
         <PromoBanner />
-        <Header />
-        <MainContent />
+        <div className="hero-section">
+            <div className="hero-overlay"></div>
+            <Header />
+            <MainContent />
+        </div>
         <img src="/line2.svg" alt="Line" className="line2"/>
         <Courses />
         <Reviews />

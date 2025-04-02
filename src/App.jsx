@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
@@ -7,7 +7,32 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/autoplay';
 
-// Вынесем линию в корневой компонент для избежания проблем с контейнерами
+
+function setupSmoothScroll() {
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      
+      if (this.getAttribute('href') === '#') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth'
+        });
+      }
+    });
+  });
+}
+
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('DOMContentLoaded', setupSmoothScroll);
+}
+
 const DecorativeLine2 = () => (
   <img src="/line2.svg" alt="Line" className="line2"/>
 );
@@ -24,6 +49,9 @@ export function PromoBanner() {
             setTimeLeft(prevTime => {
                 let { hours, minutes, seconds } = prevTime;
                 
+
+
+
                 if (seconds > 0) {
                     seconds -= 1;
                 } else {
@@ -52,27 +80,30 @@ export function PromoBanner() {
         return value < 10 ? `0${value}` : value;
     };
     
-    const scrollToForm = () => {
-        const form = document.querySelector('.order');
+    const scrollToCourse = () => {
+        const form = document.querySelector('.courses');
         form?.scrollIntoView({ behavior: 'smooth' });
     };
     
     return (
         <div className="promo-banner">
             <div className="promo-banner-inner">
+                <img src="/banner/left-icon.png" alt="" className="promo-icon-left"/>
                 <div className="promo-text">
                     Вдохновляем скидками до 55%
                 </div>
+                <img src="/banner/sale-sa.png" alt="Promo Icon Right" className="promo-icon"/>
                 <div className="promo-right-block">
+                    <button className="promo-button" onClick={() => scrollToCourse()}>
+                        Выбрать курс
+                    </button>
                     <div className="promo-timer">
                         <span className="timer-label">До конца акции:</span>
                         <span className="timer-value">
                             {formatTime(timeLeft.hours)}:{formatTime(timeLeft.minutes)}:{formatTime(timeLeft.seconds)}
                         </span>
                     </div>
-                    <button className="promo-button" onClick={() => scrollToForm()}>
-                        Выбрать курс
-                    </button>
+
                 </div>
             </div>
         </div>
@@ -84,16 +115,15 @@ export function Header() {
         <div className="header">
             <div className="container">
                 <div className="logo">
-                    <a href="#">
+                    <a href="#" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                         <span className="logo-text">KINGS COURSE</span>
                     </a>
                 </div>
                 <nav className="menu">
                     <ul className="menu_list">
-                        
-                        <li className="menu_item"><a href="#">Курсы</a></li>
-                        <li className="menu_item"><a href="#">Отзывы</a></li>
-                        <li className="menu_item"><a href="#">Записаться</a></li>
+                        <li className="menu_item"><a href="#programs">Курсы</a></li>
+                        <li className="menu_item"><a href="#reviews">Отзывы</a></li>
+                        <li className="menu_item"><a href="#order">Записаться</a></li>
                     </ul>
                 </nav>
             </div>
@@ -102,20 +132,37 @@ export function Header() {
 }
 
 export function MainContent() {
+    const scrollToOrder = () => {
+        const orderSection = document.getElementById('order');
+        if (orderSection) {
+            const headerHeight = document.querySelector('.header')?.offsetHeight || 0;
+            const yOffset = -headerHeight - 20; // Дополнительный отступ для комфорта
+            const y = orderSection.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            
+            window.scrollTo({
+                top: y,
+                behavior: 'smooth'
+            });
+        }
+    };
+    
     return (
         <div className="main_content">
             <div className="container">
-                <img src="/line1.svg" alt="Line" className="line1"/>
                 <div className="main-info">
                     <h1 className="main-title">Овладейте любым языком.</h1>
                     <p className="main-text">
-                        Эффективные программы для изучения иностранных языков с нуля
-                        до продвинутого уровня. Интерактивные занятия с преподавателями-
-                        носителями языка.
+                    Мы предлагаем эффективное обучение иностранным языкам под руководством опытных преподавателей. Наши программы разработаны с учетом современных методик и ваших индивидуальных целей. Начните свой путь к успеху уже сегодня!
                     </p>
+                    <button 
+                        className="button violet-button hero-button"
+                        onClick={scrollToOrder}
+                    >
+                        Начать обучение
+                    </button>
                 </div>
                 <div className="main-image">
-                    <img src="/foreign-language.svg" alt="Изучение языков" />
+
                 </div>
             </div>
         </div>
@@ -126,7 +173,7 @@ export function Courses() {
     const courses = [
         {
             id: 1,
-            image: "/eng.png",
+            image: "/courses-bg/eng-bg.avif",
             title: "Английский язык",
             description: "Погрузись в мир английского!",
             features: [
@@ -137,7 +184,7 @@ export function Courses() {
         },
         {
             id: 2,
-            image: "/ger 1.svg",
+            image: "/courses-bg/ger-bg.avif",
             title: "Немецкий язык",
             description: "Открой для себя язык Гёте!",
             features: [
@@ -148,7 +195,7 @@ export function Courses() {
         },
         {
             id: 3,
-            image: "/fr.svg",
+            image: "/courses-bg/fr-bg.avif",
             title: "Французский язык",
             description: "Говори, как парижанин!",
             features: [
@@ -159,7 +206,7 @@ export function Courses() {
         },
         {
             id: 4,
-            image: "/es 1.svg",
+            image: "/courses-bg/esp-bg.avif",
             title: "Испанский язык",
             description: "Почувствуй страсть Испании!",
             features: [
@@ -170,7 +217,7 @@ export function Courses() {
         },
         {
             id: 5,
-            image: "/italy.png",
+            image: "/courses-bg/italy-bg.avif",
             title: "Итальянский язык",
             description: "Говори, как в Италии!",
             features: [
@@ -181,7 +228,7 @@ export function Courses() {
         },
         {
             id: 6,
-            image: "/jap.svg",
+            image: "/courses-bg/japon-bg.avif",
             title: "Японский язык",
             description: "Погрузись в культуру Японии!",
             features: [
@@ -192,7 +239,7 @@ export function Courses() {
         },
         {
             id: 7,
-            image: "/china.svg",
+            image: "/courses-bg/china-bg.avif",
             title: "Китайский язык",
             description: "Откройте для себя язык будущего!",
             features: [
@@ -203,7 +250,7 @@ export function Courses() {
         },
         {
             id: 8,
-            image: "/korea.svg",
+            image: "/courses-bg/korea-bg.avif",
             title: "Корейский язык",
             description: "Погрузитесь в K-culture!",
             features: [
@@ -214,7 +261,7 @@ export function Courses() {
         },
         {
             id: 9,
-            image: "/arabic.svg",
+            image: "/courses-bg/arab-bg.avif",
             title: "Арабский язык",
             description: "Изучите язык Ближнего Востока!",
             features: [
@@ -225,7 +272,7 @@ export function Courses() {
         },
         {
             id: 10,
-            image: "/portugal.svg",
+            image: "/courses-bg/portugal-bg.avif",
             title: "Португальский язык",
             description: "Откройте мир лузофонии!",
             features: [
@@ -235,6 +282,38 @@ export function Courses() {
             ]
         }
     ];
+
+    const [selectedCard, setSelectedCard] = useState(null);
+
+    const handleCardClick = (id) => {
+        setSelectedCard(selectedCard === id ? null : id);
+    };
+    
+    const scrollToOrder = () => {
+        const orderSection = document.getElementById('order');
+        if (orderSection) {
+            const headerHeight = document.querySelector('.header')?.offsetHeight || 0;
+            const yOffset = -headerHeight - 20; 
+            const y = orderSection.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            
+            window.scrollTo({
+                top: y,
+                behavior: 'smooth'
+            });
+        }
+    };
+
+    useEffect(() => {
+        
+        document.querySelectorAll('.course-card.with-bg').forEach(card => {
+            const bgImage = card.getAttribute('data-bg');
+            if (bgImage) {
+                card.style.setProperty('--bg-image', `url(${bgImage})`);
+                card.querySelector('.course-details').style.position = 'relative';
+                card.querySelector('.course-details').style.zIndex = '2';
+            }
+        });
+    }, []);
 
     return (
         <section className="courses" id="programs">
@@ -246,9 +325,7 @@ export function Courses() {
                     spaceBetween={40}
                     loop={true}
                     navigation={true}
-                    pagination={{
-                        clickable: true
-                    }}
+                    pagination={false}
                     className="swiper"
                     breakpoints={{
                         0: {
@@ -264,19 +341,32 @@ export function Courses() {
                 >
                     {courses.map((course) => (
                         <SwiperSlide key={course.id}>
-                            <div className="course-card">
-                                <div className="course-image">
-                                    <img src={course.image} alt={course.title}/>
-                                </div>
+                            <div 
+                                className={`course-card ${selectedCard === course.id ? 'active' : 'with-bg'}`} 
+                                data-bg={course.image}
+                                onClick={() => handleCardClick(course.id)}
+                            >
                                 <div className="course-details">
                                     <h3 className="course-title">{course.title}</h3>
-                                    <p className="course-description">{course.description}</p>
-                                    <ul className="course-features">
-                                        {course.features.map((feature, index) => (
-                                            <li key={index}>🔷 {feature}</li>
-                                        ))}
-                                    </ul>
-                                    <button className="button">Узнать</button>
+                                    {selectedCard === course.id && (
+                                        <>
+                                            <p className="course-description">{course.description}</p>
+                                            <ul className="course-features">
+                                                {course.features.map((feature, index) => (
+                                                    <li key={index}>🔷 {feature}</li>
+                                                ))}
+                                            </ul>
+                                            <button 
+                                                className="button white-button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    scrollToOrder();
+                                                }}
+                                            >
+                                                Узнать больше
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </SwiperSlide>
@@ -352,10 +442,7 @@ export function Reviews() {
                         slidesPerView={1}
                         navigation={true}
                         loop={true}
-                        pagination={{
-                            clickable: true,
-                            el: '.swiper-pagination'
-                        }}
+                        pagination={false}
                         breakpoints={{
                             640: {
                                 slidesPerView: 1,
@@ -387,7 +474,6 @@ export function Reviews() {
                             </SwiperSlide>
                         ))}
                     </Swiper>
-                    <div className="swiper-pagination"></div>
                 </div>
             </div>
         </div>
@@ -468,7 +554,6 @@ export function OrderForm() {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
         
-        // Clear error when user types
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: '' }));
         }
@@ -509,7 +594,7 @@ export function OrderForm() {
         if (validateForm()) {
             setIsSubmitting(true);
             
-            // Имитация отправки данных на сервер
+           
             setTimeout(() => {
                 console.log('Form submitted:', formData);
                 alert('Заявка успешно отправлена!');
@@ -557,7 +642,7 @@ export function OrderForm() {
                                     <input
                                         type="tel"
                                         name="phone"
-                                        placeholder="(999) 123-45-67"
+                                        placeholder="(777) 123-45-67"
                                         value={formData.phone}
                                         onChange={handleChange}
                                         className={errors.phone ? 'error' : ''}
