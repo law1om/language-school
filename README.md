@@ -1,12 +1,75 @@
-# React + Vite
+# Языковая Школа "Kings Courses"
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Курсовая работа по созданию веб-сайта для языковой школы "Kings Courses", разработанная с использованием React и Vite.
 
-Currently, two official plugins are available:
+## О проекте
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Данный проект представляет собой курсовую работу, выполненную в рамках обучения веб-разработке. Основная цель проекта — практическое изучение React и современных подходов к созданию интерактивных веб-приложений.
 
-## Expanding the ESLint configuration
+"Kings Courses" — это сайт вымышленной языковой школы, предлагающей различные языковые курсы. В ходе разработки были освоены ключевые концепции React, такие как компонентный подход, управление состоянием, работа с хуками и создание интерактивного пользовательского интерфейса.
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Образовательные цели проекта
+
+- Изучение основ React и принципов создания SPA
+- Освоение инструмента сборки Vite
+- Работа с внешними библиотеками (React Icons, Swiper)
+- Создание адаптивных интерфейсов
+- Практика в структурировании кода и организации проекта
+
+## Особенности
+
+- **Детальное описание программ**: Каждый курс содержит подробную информацию о программе обучения для разных уровней
+- **Современный интерфейс**: Разработан с использованием React и современных веб-технологий
+- **Адаптивный дизайн**: Корректное отображение на различных устройствах
+
+## Технологии
+
+- **React**: Библиотека для создания пользовательских интерфейсов
+- **Vite**: Современный инструмент сборки для быстрой разработки
+- **Swiper**: Библиотека для создания слайдеров
+
+## Установка и запуск
+
+1. Клонировать репозиторий:
+   ```bash
+   git clone [url репозитория]
+   ```
+
+2. Перейти в директорию проекта:
+   ```bash
+   cd language-school
+   ```
+
+3. Установить зависимости:
+   ```bash
+   npm install
+   ```
+
+4. Запустить проект в режиме разработки:
+   ```bash
+   npm run dev
+   ```
+
+5. Для сборки проекта:
+   ```bash
+   npm run build
+   ```
+
+## Структура проекта
+
+- `src/` - Исходный код приложения
+  - `components/` - React компоненты
+  - `App.jsx` - Основной компонент приложения
+  - `App.css` - Стили приложения
+  - `main.jsx` - Точка входа
+
+## Полученные навыки
+
+В процессе разработки данного проекта были получены следующие навыки:
+- Создание функциональных компонентов в React
+- Использование хуков (useState, useEffect)
+- Стилизация компонентов с помощью CSS
+- Работа с маршрутизацией в SPA
+- Взаимодействие с внешними библиотеками
+- Организация кода в соответствии с лучшими практиками
+
