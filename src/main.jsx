@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import {Header, MainContent, Courses, Reviews, FAQ, OrderForm, Footer, ScrollToTopButton, PromoBanner} from "./App";
 import "./index.css";
+import Assistant from "./components/Assistant";
 
 const App = () => (
     <>
@@ -19,6 +20,7 @@ const App = () => (
         <OrderForm/>
         <Footer/>
         <ScrollToTopButton />
+        <Assistant />
     </>
 );
 

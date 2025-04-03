@@ -1,0 +1,56 @@
+.assistant-button {
+  position: fixed;
+  bottom: 30px;
+  right: 25px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #624bff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(98, 75, 255, 0.3);
+  transition: all 0.3s ease;
+  z-index: 9999;
+  animation: assistantAppear 0.5s ease-out, breathe 2s infinite ease-in-out;
+}
+
+@keyframes assistantAppear {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes breathe {
+  0% {
+    box-shadow: 0 4px 12px rgba(98, 75, 255, 0.3);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(98, 75, 255, 0.5);
+    transform: scale(1.05);
+  }
+  100% {
+    box-shadow: 0 4px 12px rgba(98, 75, 255, 0.3);
+    transform: scale(1);
+  }
+}
+
+.assistant-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(98, 75, 255, 0.4);
+  background-color: #5237e3;
+  animation: none;
+}
+
+.assistant-button svg {
+  color: white;
+  width: 24px;
+  height: 24px;
+}

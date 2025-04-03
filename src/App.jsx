@@ -6,6 +6,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/autoplay';
+import Assistant from './components/Assistant';
 
 
 function setupSmoothScroll() {
@@ -20,7 +21,12 @@ function setupSmoothScroll() {
       
       const target = document.querySelector(this.getAttribute('href'));
       if (target) {
-        target.scrollIntoView({
+        const headerHeight = document.querySelector('.header')?.offsetHeight || 0;
+        const yOffset = -headerHeight - 20 + 100;
+        const y = target.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        
+        window.scrollTo({
+          top: y,
           behavior: 'smooth'
         });
       }
@@ -81,8 +87,17 @@ export function PromoBanner() {
     };
     
     const scrollToCourse = () => {
-        const form = document.querySelector('.courses');
-        form?.scrollIntoView({ behavior: 'smooth' });
+        const coursesSection = document.getElementById('programs');
+        if (coursesSection) {
+            const headerHeight = document.querySelector('.header')?.offsetHeight || 0;
+            const yOffset = -headerHeight - 20 + 260;
+            const y = coursesSection.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            
+            window.scrollTo({
+                top: y,
+                behavior: 'smooth'
+            });
+        }
     };
     
     return (
@@ -98,7 +113,7 @@ export function PromoBanner() {
                         Выбрать курс
                     </button>
                     <div className="promo-timer">
-                        <span className="timer-label">До конца акции:</span>
+                        <span className="timer-label">До конца акции: </span>
                         <span className="timer-value">
                             {formatTime(timeLeft.hours)}:{formatTime(timeLeft.minutes)}:{formatTime(timeLeft.seconds)}
                         </span>
@@ -111,6 +126,20 @@ export function PromoBanner() {
 }
 
 export function Header() {
+    const scrollToSection = (id) => {
+        const section = document.getElementById(id);
+        if (section) {
+            const headerHeight = document.querySelector('.header')?.offsetHeight || 0;
+            const yOffset = -headerHeight - 20 + 260;
+            const y = section.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            
+            window.scrollTo({
+                top: y,
+                behavior: 'smooth'
+            });
+        }
+    };
+    
     return (
         <div className="header">
             <div className="container">
@@ -121,9 +150,9 @@ export function Header() {
                 </div>
                 <nav className="menu">
                     <ul className="menu_list">
-                        <li className="menu_item"><a href="#programs">Курсы</a></li>
-                        <li className="menu_item"><a href="#reviews">Отзывы</a></li>
-                        <li className="menu_item"><a href="#order">Записаться</a></li>
+                        <li className="menu_item"><a href="#programs" onClick={(e) => { e.preventDefault(); scrollToSection('programs'); }}>Курсы</a></li>
+                        <li className="menu_item"><a href="#reviews" onClick={(e) => { e.preventDefault(); scrollToSection('reviews'); }}>Отзывы</a></li>
+                        <li className="menu_item"><a href="#order" onClick={(e) => { e.preventDefault(); scrollToSection('order'); }}>Записаться</a></li>
                     </ul>
                 </nav>
             </div>
@@ -133,10 +162,10 @@ export function Header() {
 
 export function MainContent() {
     const scrollToOrder = () => {
-        const orderSection = document.getElementById('order');
+        const orderSection = document.getElementById('programs');
         if (orderSection) {
             const headerHeight = document.querySelector('.header')?.offsetHeight || 0;
-            const yOffset = -headerHeight - 20; // Дополнительный отступ для комфорта
+            const yOffset = -headerHeight - 20 + 270;
             const y = orderSection.getBoundingClientRect().top + window.pageYOffset + yOffset;
             
             window.scrollTo({
@@ -180,6 +209,32 @@ export function Courses() {
                 "Курсы для всех уровней (A1–C2)",
                 "Разговорная практика с носителями",
                 "Подготовка к экзаменам (IELTS, TOEFL)"
+            ],
+            program: [
+                {
+                    title: "Начальный уровень",
+                    content: [
+                        "Базовая грамматика и лексика",
+                        "Повседневные фразы и выражения",
+                        "Основы произношения"
+                    ]
+                },
+                {
+                    title: "Средний уровень",
+                    content: [
+                        "Углубленная грамматика (времена, пассивный залог)",
+                        "Разговорные клубы и дискуссии",
+                        "Аудирование и понимание речи носителей"
+                    ]
+                },
+                {
+                    title: "Продвинутый уровень",
+                    content: [
+                        "Сложные грамматические конструкции",
+                        "Деловой английский и переговоры",
+                        "Подготовка к международным экзаменам"
+                    ]
+                }
             ]
         },
         {
@@ -191,6 +246,32 @@ export function Courses() {
                 "Грамматика и произношение с нуля",
                 "Подготовка к Goethe-Zertifikat",
                 "Бизнес-немецкий и путешествия"
+            ],
+            program: [
+                {
+                    title: "Базовый курс",
+                    content: [
+                        "Немецкий алфавит и произношение",
+                        "Основные фразы и выражения",
+                        "Простые грамматические конструкции"
+                    ]
+                },
+                {
+                    title: "Продвинутый курс",
+                    content: [
+                        "Сложная грамматика (времена, склонения)",
+                        "Разговорная практика и диалоги",
+                        "Чтение и анализ немецких текстов"
+                    ]
+                },
+                {
+                    title: "Специализированный курс",
+                    content: [
+                        "Деловой немецкий",
+                        "Медицинский немецкий",
+                        "Подготовка к экзаменам"
+                    ]
+                }
             ]
         },
         {
@@ -202,6 +283,32 @@ export function Courses() {
                 "Французский с нуля до продвинутого уровня",
                 "Подготовка к DELF/DALF",
                 "Разговорные клубы и интерактивные уроки"
+            ],
+            program: [
+                {
+                    title: "Вводный курс",
+                    content: [
+                        "Фонетика и произношение",
+                        "Базовый словарный запас",
+                        "Простые грамматические структуры"
+                    ]
+                },
+                {
+                    title: "Основной курс",
+                    content: [
+                        "Времена и наклонения",
+                        "Повседневные диалоги и ситуации",
+                        "Французская культура и традиции"
+                    ]
+                },
+                {
+                    title: "Профессиональный курс",
+                    content: [
+                        "Бизнес-французский",
+                        "Подготовка к экзаменам DELF/DALF",
+                        "Перевод и интерпретация"
+                    ]
+                }
             ]
         },
         {
@@ -213,6 +320,32 @@ export function Courses() {
                 "Латинская Америка vs Испания",
                 "Подготовка к DELE",
                 "Сленг и культура испаноязычных стран"
+            ],
+            program: [
+                {
+                    title: "Уровень A1-A2",
+                    content: [
+                        "Основы испанской грамматики",
+                        "Базовые разговорные фразы",
+                        "Испанское произношение"
+                    ]
+                },
+                {
+                    title: "Уровень B1-B2",
+                    content: [
+                        "Углубленная грамматика",
+                        "Разговорная практика",
+                        "Различия между испанским Испании и Латинской Америки"
+                    ]
+                },
+                {
+                    title: "Уровень C1-C2",
+                    content: [
+                        "Изучение сложных конструкций",
+                        "Деловой испанский",
+                        "Подготовка к экзамену DELE"
+                    ]
+                }
             ]
         },
         {
@@ -224,6 +357,32 @@ export function Courses() {
                 "Итальянский для путешествий",
                 "Музыка и кино на итальянском",
                 "Культура и традиции Италии"
+            ],
+            program: [
+                {
+                    title: "Начальный уровень",
+                    content: [
+                        "Базовая грамматика и лексика",
+                        "Итальянское произношение",
+                        "Простые диалоги"
+                    ]
+                },
+                {
+                    title: "Средний уровень",
+                    content: [
+                        "Времена и наклонения",
+                        "Разговорная практика",
+                        "Итальянская культура и традиции"
+                    ]
+                },
+                {
+                    title: "Продвинутый уровень",
+                    content: [
+                        "Сложные грамматические конструкции",
+                        "Итальянская литература и кино",
+                        "Деловой итальянский"
+                    ]
+                }
             ]
         },
         {
@@ -235,6 +394,32 @@ export function Courses() {
                 "Японский язык с носителями",
                 "Подготовка к JLPT (N5–N1)",
                 "Разговорная практика и чтение манги"
+            ],
+            program: [
+                {
+                    title: "Хирагана и Катакана",
+                    content: [
+                        "Изучение японских азбук",
+                        "Базовые фразы и выражения",
+                        "Основы грамматики"
+                    ]
+                },
+                {
+                    title: "Кандзи и грамматика",
+                    content: [
+                        "Изучение базовых иероглифов",
+                        "Расширенная грамматика",
+                        "Разговорная практика"
+                    ]
+                },
+                {
+                    title: "Продвинутый японский",
+                    content: [
+                        "Сложные иероглифы и выражения",
+                        "Подготовка к JLPT",
+                        "Изучение японской культуры"
+                    ]
+                }
             ]
         },
         {
@@ -246,6 +431,32 @@ export function Courses() {
                 "Изучение иероглифов с нуля",
                 "Подготовка к HSK (1-6)",
                 "Бизнес-китайский и культура Китая"
+            ],
+            program: [
+                {
+                    title: "Базовый китайский",
+                    content: [
+                        "Китайская фонетика и тоны",
+                        "Базовые иероглифы",
+                        "Простые разговорные фразы"
+                    ]
+                },
+                {
+                    title: "Средний уровень",
+                    content: [
+                        "Расширенный словарный запас",
+                        "Грамматические конструкции",
+                        "Разговорная практика"
+                    ]
+                },
+                {
+                    title: "Продвинутый курс",
+                    content: [
+                        "Сложные иероглифы и выражения",
+                        "Деловой китайский",
+                        "Подготовка к HSK 5-6"
+                    ]
+                }
             ]
         },
         {
@@ -257,6 +468,32 @@ export function Courses() {
                 "Корейский алфавит и грамматика",
                 "Подготовка к TOPIK",
                 "K-pop и корейские сериалы"
+            ],
+            program: [
+                {
+                    title: "Хангыль (корейский алфавит)",
+                    content: [
+                        "Изучение корейского алфавита",
+                        "Базовое произношение",
+                        "Простые фразы"
+                    ]
+                },
+                {
+                    title: "Базовая грамматика",
+                    content: [
+                        "Основные грамматические конструкции",
+                        "Расширение словарного запаса",
+                        "Повседневные диалоги"
+                    ]
+                },
+                {
+                    title: "Продвинутый корейский",
+                    content: [
+                        "Сложная грамматика",
+                        "Подготовка к TOPIK",
+                        "Изучение корейской культуры"
+                    ]
+                }
             ]
         },
         {
@@ -268,6 +505,32 @@ export function Courses() {
                 "Арабский алфавит и каллиграфия",
                 "Диалекты арабского мира",
                 "Культура и традиции арабских стран"
+            ],
+            program: [
+                {
+                    title: "Арабский алфавит",
+                    content: [
+                        "Изучение арабских букв",
+                        "Основы каллиграфии",
+                        "Базовое произношение"
+                    ]
+                },
+                {
+                    title: "Базовая грамматика",
+                    content: [
+                        "Грамматические структуры",
+                        "Базовые разговорные фразы",
+                        "Различия между диалектами"
+                    ]
+                },
+                {
+                    title: "Продвинутый уровень",
+                    content: [
+                        "Сложная грамматика",
+                        "Современный стандартный арабский",
+                        "Арабская литература и СМИ"
+                    ]
+                }
             ]
         },
         {
@@ -279,32 +542,80 @@ export function Courses() {
                 "Португальский Португалии и Бразилии",
                 "Подготовка к CAPLE",
                 "Культура португалоязычных стран"
+            ],
+            program: [
+                {
+                    title: "Начальный уровень",
+                    content: [
+                        "Базовая лексика и грамматика",
+                        "Португальское произношение",
+                        "Простые диалоги"
+                    ]
+                },
+                {
+                    title: "Средний уровень",
+                    content: [
+                        "Углубленная грамматика",
+                        "Различия между португальским Португалии и Бразилии",
+                        "Разговорная практика"
+                    ]
+                },
+                {
+                    title: "Продвинутый уровень",
+                    content: [
+                        "Сложные грамматические конструкции",
+                        "Деловой португальский",
+                        "Подготовка к CAPLE"
+                    ]
+                }
             ]
         }
     ];
 
-    const [selectedCard, setSelectedCard] = useState(null);
-
-    const handleCardClick = (id) => {
-        setSelectedCard(selectedCard === id ? null : id);
+    const [selectedCourse, setSelectedCourse] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [expandedSections, setExpandedSections] = useState([]);
+    
+    const handleCardClick = (course) => {
+        setSelectedCourse(course);
+        setIsModalOpen(true);
+        setExpandedSections([]);
+    };
+    
+    const closeModal = () => {
+        setIsModalOpen(false);
+    };
+    
+    const toggleSection = (index) => {
+        setExpandedSections(prev => {
+            if (prev.includes(index)) {
+                return prev.filter(i => i !== index);
+            } else {
+                return [...prev, index];
+            }
+        });
     };
     
     const scrollToOrder = () => {
         const orderSection = document.getElementById('order');
         if (orderSection) {
             const headerHeight = document.querySelector('.header')?.offsetHeight || 0;
-            const yOffset = -headerHeight - 20; 
+            const yOffset = -headerHeight - 20 + 270;
             const y = orderSection.getBoundingClientRect().top + window.pageYOffset + yOffset;
             
             window.scrollTo({
                 top: y,
                 behavior: 'smooth'
             });
+            closeModal();
+            
+            if (selectedCourse && window.setCourseInOrderForm) {
+                window.setCourseInOrderForm(selectedCourse.title);
+            }
         }
     };
 
     useEffect(() => {
-        
         document.querySelectorAll('.course-card.with-bg').forEach(card => {
             const bgImage = card.getAttribute('data-bg');
             if (bgImage) {
@@ -342,37 +653,66 @@ export function Courses() {
                     {courses.map((course) => (
                         <SwiperSlide key={course.id}>
                             <div 
-                                className={`course-card ${selectedCard === course.id ? 'active' : 'with-bg'}`} 
+                                className="course-card with-bg" 
                                 data-bg={course.image}
-                                onClick={() => handleCardClick(course.id)}
+                                onClick={() => handleCardClick(course)}
                             >
                                 <div className="course-details">
                                     <h3 className="course-title">{course.title}</h3>
-                                    {selectedCard === course.id && (
-                                        <>
-                                            <p className="course-description">{course.description}</p>
-                                            <ul className="course-features">
-                                                {course.features.map((feature, index) => (
-                                                    <li key={index}>🔷 {feature}</li>
-                                                ))}
-                                            </ul>
-                                            <button 
-                                                className="button white-button"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    scrollToOrder();
-                                                }}
-                                            >
-                                                Узнать больше
-                                            </button>
-                                        </>
-                                    )}
                                 </div>
                             </div>
                         </SwiperSlide>
                     ))}
                 </Swiper>
             </div>
+            
+            {isModalOpen && selectedCourse && (
+                <div className="course-modal-overlay" onClick={closeModal}>
+                    <div className="course-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="course-modal-header">
+                            <button className="modal-close-btn modal-close-left" onClick={closeModal}>×</button>
+                            <h3>{selectedCourse.title}</h3>
+                            <div className="modal-header-space"></div>
+                        </div>
+                        <div className="course-modal-body">
+                            <p className="course-description">{selectedCourse.description}</p>
+                            
+                            <div className="course-program">
+                                <h4>Программа курса:</h4>
+                                <div className="program-accordion">
+                                    {selectedCourse.program.map((section, index) => (
+                                        <div key={index} className="program-section">
+                                            <div 
+                                                className={`program-header ${expandedSections.includes(index) ? 'expanded' : ''}`}
+                                                onClick={() => toggleSection(index)}
+                                            >
+                                                <h5>{section.title}</h5>
+                                                <span className="accordion-icon">
+                                                    {expandedSections.includes(index) ? '−' : '+'}
+                                                </span>
+                                            </div>
+                                            <div className={`program-content ${expandedSections.includes(index) ? 'expanded' : ''}`}>
+                                                <ul>
+                                                    {section.content.map((item, itemIndex) => (
+                                                        <li key={itemIndex}>{item}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            <button 
+                                className="button violet-button"
+                                onClick={scrollToOrder}
+                            >
+                                Записаться на курс
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </section>
     );
 }
@@ -542,13 +882,23 @@ export function FAQ() {
 
 export function OrderForm() {
     const [formData, setFormData] = useState({
+        course: '',
         name: '',
-        email: '',
         phone: ''
     });
     
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    
+    useEffect(() => {
+        window.setCourseInOrderForm = (courseName) => {
+            setFormData(prev => ({ ...prev, course: courseName }));
+        };
+        
+        return () => {
+            window.setCourseInOrderForm = null;
+        };
+    }, []);
     
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -563,16 +913,13 @@ export function OrderForm() {
         let formErrors = {};
         let isValid = true;
         
-        if (!formData.name.trim()) {
-            formErrors.name = 'Введите имя';
+        if (!formData.course.trim()) {
+            formErrors.course = 'Выберите курс';
             isValid = false;
         }
-        
-        if (!formData.email.trim()) {
-            formErrors.email = 'Введите email';
-            isValid = false;
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            formErrors.email = 'Некорректный email';
+
+        if (!formData.name.trim()) {
+            formErrors.name = 'Введите имя';
             isValid = false;
         }
         
@@ -598,7 +945,7 @@ export function OrderForm() {
             setTimeout(() => {
                 console.log('Form submitted:', formData);
                 alert('Заявка успешно отправлена!');
-                setFormData({ name: '', email: '', phone: '' });
+                setFormData({ course: '', name: '', phone: '' });
                 setIsSubmitting(false);
             }, 1500);
         }
@@ -615,6 +962,27 @@ export function OrderForm() {
                         </div>
                         <form className="order-form-inputs" onSubmit={handleSubmit}>
                             <div className="input-group">
+                                <select
+                                    name="course"
+                                    value={formData.course}
+                                    onChange={handleChange}
+                                    className={errors.course ? 'error' : ''}
+                                >
+                                    <option value="">Выберите курс</option>
+                                    <option value="Английский язык">Английский язык</option>
+                                    <option value="Немецкий язык">Немецкий язык</option>
+                                    <option value="Французский язык">Французский язык</option>
+                                    <option value="Испанский язык">Испанский язык</option>
+                                    <option value="Итальянский язык">Итальянский язык</option>
+                                    <option value="Японский язык">Японский язык</option>
+                                    <option value="Китайский язык">Китайский язык</option>
+                                    <option value="Корейский язык">Корейский язык</option>
+                                    <option value="Арабский язык">Арабский язык</option>
+                                    <option value="Португальский язык">Португальский язык</option>
+                                </select>
+                                {errors.course && <div className="error-message">{errors.course}</div>}
+                            </div>
+                            <div className="input-group">
                                 <input
                                     type="text"
                                     name="name"
@@ -624,17 +992,6 @@ export function OrderForm() {
                                     className={errors.name ? 'error' : ''}
                                 />
                                 {errors.name && <div className="error-message">{errors.name}</div>}
-                            </div>
-                            <div className="input-group">
-                                <input
-                                    type="email"
-                                    name="email"
-                                    placeholder="Ваш email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    className={errors.email ? 'error' : ''}
-                                />
-                                {errors.email && <div className="error-message">{errors.email}</div>}
                             </div>
                             <div className="input-group phone-input-group">
                                 <div className="phone-input-container">
@@ -718,4 +1075,23 @@ export function ScrollToTopButton() {
             )}
         </>
     );
-} 
+}
+
+function App() {
+  return (
+    <div className="app">
+      <Header />
+      <PromoBanner />
+      <MainContent />
+      <Courses />
+      <Reviews />
+      <FAQ />
+      <OrderForm />
+      <Footer />
+      <ScrollToTopButton />
+      <Assistant />
+    </div>
+  );
+}
+
+export default App; 
