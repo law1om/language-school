@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -35,19 +35,15 @@ function setupSmoothScroll() {
 }
 
 
-if (typeof window !== 'undefined') {
-  window.addEventListener('DOMContentLoaded', setupSmoothScroll);
-}
-
 const DecorativeLine2 = () => (
   <img src="/line2.svg" alt="Line" className="line2"/>
 );
 
 export function PromoBanner() {
     const [timeLeft, setTimeLeft] = useState({
-        hours: 10,
-        minutes: 26,
-        seconds: 32
+        hours: 9,
+        minutes: 50,
+        seconds: 40
     });
     
     useEffect(() => {
@@ -935,16 +931,46 @@ export function OrderForm() {
         return isValid;
     };
     
+    const saveFormDataToJson = (data) => {
+       
+        const existingData = JSON.parse(localStorage.getItem('formSubmissions') || '[]');
+        
+       
+        const newSubmission = {
+            ...data,
+            submittedAt: new Date().toISOString(),
+            id: Date.now() 
+        };
+        
+        
+        existingData.push(newSubmission);
+        
+        
+        localStorage.setItem('formSubmissions', JSON.stringify(existingData));
+        
+        console.log('Данные сохранены в localStorage:', newSubmission);
+        return newSubmission;
+    };
+    
     const handleSubmit = (e) => {
         e.preventDefault();
         
         if (validateForm()) {
             setIsSubmitting(true);
             
-           
+            
+            const submissionData = {
+                course: formData.course,
+                name: formData.name,
+                phone: '+7' + formData.phone
+            };
+            
             setTimeout(() => {
-                console.log('Form submitted:', formData);
-                alert('Заявка успешно отправлена!');
+                
+                const savedData = saveFormDataToJson(submissionData);
+                
+                console.log('Form submitted:', savedData);
+                alert('Заявка успешно отправлена и сохранена!');
                 setFormData({ course: '', name: '', phone: '' });
                 setIsSubmitting(false);
             }, 1500);
@@ -990,6 +1016,7 @@ export function OrderForm() {
                                     value={formData.name}
                                     onChange={handleChange}
                                     className={errors.name ? 'error' : ''}
+                                    autoComplete="off"
                                 />
                                 {errors.name && <div className="error-message">{errors.name}</div>}
                             </div>
@@ -1003,6 +1030,7 @@ export function OrderForm() {
                                         value={formData.phone}
                                         onChange={handleChange}
                                         className={errors.phone ? 'error' : ''}
+                                        autoComplete="off"
                                     />
                                 </div>
                                 {errors.phone && <div className="error-message">{errors.phone}</div>}
@@ -1077,21 +1105,3 @@ export function ScrollToTopButton() {
     );
 }
 
-function App() {
-  return (
-    <div className="app">
-      <Header />
-      <PromoBanner />
-      <MainContent />
-      <Courses />
-      <Reviews />
-      <FAQ />
-      <OrderForm />
-      <Footer />
-      <ScrollToTopButton />
-      <Assistant />
-    </div>
-  );
-}
-
-export default App; 

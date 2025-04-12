@@ -14,6 +14,7 @@
   transition: all 0.3s ease;
   z-index: 9999;
   animation: assistantAppear 0.5s ease-out, breathe 2s infinite ease-in-out;
+  border: none;
 }
 
 @keyframes assistantAppear {
@@ -53,4 +54,172 @@
   color: white;
   width: 24px;
   height: 24px;
+}
+
+.assistant {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.popup {
+  position: absolute;
+  bottom: 70px;
+  right: 0;
+  width: 320px;
+  max-height: 500px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+  overflow-y: auto;
+}
+
+.popup-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: all;
+}
+
+.popup-header {
+  background-color: #f5f5f7;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.popup-header h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.close-button:hover {
+  color: #555;
+}
+
+.popup-content {
+  padding: 15px;
+}
+
+.popup-content p {
+  margin: 0 0 15px 0;
+  line-height: 1.5;
+  color: #555;
+}
+
+.telegram-link {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  background-color: #27a7e5;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+  font-weight: 500;
+}
+
+.telegram-link:hover {
+  background-color: #1c96d1;
+}
+
+.telegram-link svg {
+  margin-right: 8px;
+}
+
+/* Стили для секции заявок */
+.submissions-section {
+  margin-top: 20px;
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+
+.submissions-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: none;
+  border: none;
+  color: #333;
+  font-weight: 500;
+  padding: 8px 0;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.submissions-toggle:hover {
+  color: #624bff;
+}
+
+.toggle-icon {
+  font-size: 12px;
+  transition: transform 0.3s ease;
+}
+
+.submissions-list {
+  margin-top: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.submissions-list h3 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.submission-item {
+  background-color: #f8f8f9;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-left: 3px solid #624bff;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.submission-item:hover {
+  background-color: #f0f0f5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.submission-item div {
+  margin-bottom: 5px;
+  color: black;
+}
+
+.submission-item div:last-child {
+  margin-bottom: 0;
+  color: black;
+  font-size: 12px;
+}
+
+.no-submissions {
+  color: #888;
+  font-style: italic;
+  text-align: center;
 }
