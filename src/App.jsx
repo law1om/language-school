@@ -7,6 +7,7 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/autoplay';
 import Assistant from './components/Assistant';
+import { register, login, setToken, isAuthenticated, getUserFromToken, removeToken } from './services/api';
 
 
 function setupSmoothScroll() {
@@ -122,6 +123,45 @@ export function PromoBanner() {
 }
 
 export function Header() {
+    const [showAuthModal, setShowAuthModal] = useState(false);
+    const [user, setUser] = useState(null);
+    const [showUserMenu, setShowUserMenu] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    
+    // Получение данных пользователя при загрузке
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                const userData = getUserFromToken();
+                if (userData) {
+                    try {
+                        const response = await fetch('http://localhost:3001/api/auth/user', {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            }
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            setUser(data.user);
+                        } else {
+                            // Если токен недействителен, удаляем его
+                            removeToken();
+                        }
+                    } catch (error) {
+                        console.error('Ошибка при проверке авторизации:', error);
+                    }
+                }
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        
+        checkAuth();
+    }, []);
+    
     const scrollToSection = (id) => {
         const section = document.getElementById(id);
         if (section) {
@@ -134,6 +174,27 @@ export function Header() {
                 behavior: 'smooth'
             });
         }
+    };
+    
+    const toggleAuthModal = () => {
+        setShowAuthModal(!showAuthModal);
+        setShowUserMenu(false);
+    };
+    
+    const toggleUserMenu = () => {
+        setShowUserMenu(!showUserMenu);
+    };
+    
+    const handleLogout = () => {
+        removeToken();
+        setUser(null);
+        setShowUserMenu(false);
+        window.location.reload();
+    };
+    
+    const handleAuthSuccess = (userData) => {
+        setUser(userData);
+        setShowAuthModal(false);
     };
     
     return (
@@ -151,10 +212,272 @@ export function Header() {
                         <li className="menu_item"><a href="#order" onClick={(e) => { e.preventDefault(); scrollToSection('order'); }}>Записаться</a></li>
                     </ul>
                 </nav>
+                
+                {isLoading ? (
+                    <div className="auth-loading">
+                        <div className="auth-loading-spinner"></div>
+                    </div>
+                ) : user ? (
+                    <div className="user-profile">
+                        <button className="user-button" onClick={toggleUserMenu}>
+                            <span className="user-name">{user.name || user.email}</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </button>
+                        
+                        {showUserMenu && (
+                            <div className="user-menu">
+                                <div className="user-menu-item user-info">
+                                    <div className="user-email">{user.email}</div>
+                                    <span className="user-role">{user.role === 'STUDENT' ? 'Студент' : (user.role === 'TEACHER' ? 'Преподаватель' : 'Администратор')}</span>
+                                </div>
+                                <div className="user-menu-item">
+                                    <button className="user-menu-button" onClick={handleLogout}>Выйти</button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <button className="auth-button" onClick={toggleAuthModal}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </button>
+                )}
             </div>
+            
+            {showAuthModal && (
+                <AuthModal onClose={toggleAuthModal} onAuthSuccess={handleAuthSuccess} />
+            )}
         </div>
     );
 }
+
+const AuthModal = ({ onClose, onAuthSuccess }) => {
+    const [isLogin, setIsLogin] = useState(false);
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        password: '',
+        role: 'STUDENT'
+    });
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [serverStatus, setServerStatus] = useState(null);
+    const [success, setSuccess] = useState('');
+
+    // Проверка доступности сервера при открытии модального окна
+    useEffect(() => {
+        const checkServerConnection = async () => {
+            try {
+                const response = await fetch('http://localhost:3001/api/health', { 
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (response.ok) {
+                    setServerStatus('connected');
+                } else {
+                    setServerStatus('error');
+                }
+            } catch (error) {
+                console.error("Server connection error:", error);
+                setServerStatus('disconnected');
+            }
+        };
+        
+        checkServerConnection();
+    }, []);
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+        // Сбрасываем ошибку при изменении поля
+        if (error) setError('');
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        // Проверяем доступность сервера перед отправкой
+        if (serverStatus === 'disconnected') {
+            setError('Сервер недоступен. Пожалуйста, убедитесь, что сервер запущен.');
+            return;
+        }
+        
+        setLoading(true);
+        setError('');
+        setSuccess('');
+
+        try {
+            let response;
+
+            if (isLogin) {
+                // Процесс входа
+                response = await login({
+                    email: formData.email,
+                    password: formData.password
+                });
+            } else {
+                // Процесс регистрации
+                response = await register({
+                    name: formData.name,
+                    email: formData.email,
+                    password: formData.password,
+                    role: formData.role
+                });
+            }
+
+            // Сохраняем токен в localStorage
+            if (response && response.token) {
+                setToken(response.token);
+                setSuccess(isLogin ? 'Вход выполнен успешно!' : 'Регистрация выполнена успешно!');
+                
+                // Передаем данные пользователя в родительский компонент
+                if (response.user) {
+                    onAuthSuccess(response.user);
+                }
+                
+                // Задержка перед закрытием окна для показа сообщения об успехе
+                setTimeout(() => {
+                    onClose();
+                }, 1500);
+            }
+        } catch (error) {
+            console.error("Ошибка авторизации:", error);
+            setError(error.message || 'Произошла ошибка. Попробуйте еще раз.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="auth-modal-overlay" onClick={(e) => {
+            if (e.target.className === 'auth-modal-overlay') onClose();
+        }}>
+            <div className="auth-modal">
+                <div className="auth-modal-header">
+                    <h2>{isLogin ? 'Вход' : 'Регистрация'}</h2>
+                    <button className="auth-close-btn" onClick={onClose}>×</button>
+                </div>
+                <div className="auth-modal-body">
+                    {serverStatus === 'disconnected' && (
+                        <div className="auth-error-message server-error">
+                            Не удалось подключиться к серверу. Пожалуйста, убедитесь, что сервер запущен.
+                        </div>
+                    )}
+                    
+                    {error && <div className="auth-error-message">{error}</div>}
+                    {success && <div className="auth-success-message">{success}</div>}
+                    
+                    <form onSubmit={handleSubmit}>
+                        {!isLogin ? (
+                            <>
+                                <div className="auth-input-group">
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        placeholder="Ваше имя"
+                                        value={formData.name}
+                                        onChange={handleInputChange}
+                                        required
+                                        disabled={loading}
+                                    />
+                                </div>
+                                <div className="auth-input-group">
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        placeholder="Email"
+                                        value={formData.email}
+                                        onChange={handleInputChange}
+                                        required
+                                        disabled={loading}
+                                    />
+                                </div>
+                                <div className="auth-input-group auth-role-select">
+                                    <select
+                                        name="role"
+                                        value={formData.role}
+                                        onChange={handleInputChange}
+                                        required
+                                        disabled={loading}
+                                    >
+                                        <option value="STUDENT">Студент</option>
+                                        <option value="TEACHER">Преподаватель</option>
+                                    </select>
+                                </div>
+                                <div className="auth-input-group">
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        placeholder="Пароль"
+                                        value={formData.password}
+                                        onChange={handleInputChange}
+                                        required
+                                        disabled={loading}
+                                    />
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="auth-input-group">
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        placeholder="Email"
+                                        value={formData.email}
+                                        onChange={handleInputChange}
+                                        required
+                                        disabled={loading}
+                                    />
+                                </div>
+                                <div className="auth-input-group">
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        placeholder="Пароль"
+                                        value={formData.password}
+                                        onChange={handleInputChange}
+                                        required
+                                        disabled={loading}
+                                    />
+                                </div>
+                            </>
+                        )}
+                        <button 
+                            type="submit" 
+                            className="auth-submit-btn"
+                            disabled={loading}
+                        >
+                            {loading ? 'Загрузка...' : (isLogin ? 'Войти' : 'Зарегистрироваться')}
+                        </button>
+                        <div className="auth-switch-mode">
+                            <p>
+                                {isLogin ? 'Нет аккаунта?' : 'Уже есть аккаунт?'}
+                                <button
+                                    type="button"
+                                    onClick={() => setIsLogin(!isLogin)}
+                                    className="auth-switch-btn"
+                                    disabled={loading}
+                                >
+                                    {isLogin ? 'Зарегистрироваться' : 'Войти'}
+                                </button>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 export function MainContent() {
     const scrollToOrder = () => {
