@@ -7,8 +7,138 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/autoplay';
 import Assistant from './components/Assistant';
-import { register, login, setToken, isAuthenticated, getUserFromToken, removeToken } from './services/api';
+import UserProfile from './components/UserProfile';
+import { register, login, setToken, getUserFromToken, removeToken } from './services/api';
+import { Route, Routes, Link, useNavigate, BrowserRouter } from 'react-router-dom';
+import CoursePage from './components/CoursePage';
 
+function App() {
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const userData = getUserFromToken();
+        if (userData) {
+          try {
+            const response = await fetch('http://localhost:3001/api/auth/user', {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              }
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              setUser(data.user);
+            } else {
+              removeToken();
+            }
+          } catch (error) {
+            console.error('Ошибка при проверке авторизации:', error);
+          }
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    checkAuth();
+    setupSmoothScroll();
+  }, []);
+
+  const handleUserLogin = (userData) => {
+    setUser(userData);
+  };
+  
+  const handleLogout = () => {
+    removeToken();
+    setUser(null);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="app-loading">
+        <div className="app-loading-spinner"></div>
+      </div>
+    );
+  }
+
+  return (
+    <BrowserRouter>
+      <div className="App">
+        <Routes>
+          <Route 
+            path="/course/:id" 
+            element={
+              <>
+                <Header 
+                  user={user} 
+                  onAuthSuccess={handleUserLogin}
+                  onLogout={handleLogout}
+                  currentPage="course"
+                />
+                <CoursePage />
+                <Footer />
+                <ScrollToTopButton />
+                <Assistant />
+              </>
+            } 
+          />
+          <Route 
+            path="/profile" 
+            element={
+              <>
+                <Header 
+                  user={user} 
+                  onAuthSuccess={handleUserLogin}
+                  onLogout={handleLogout}
+                  currentPage="profile"
+                />
+                <UserProfile user={user} />
+                <Footer />
+                <ScrollToTopButton />
+                <Assistant />
+              </>
+            } 
+          />
+          <Route 
+            path="/" 
+            element={
+              <>
+                <div className="hero-container">
+                  <div className="hero-section">
+                    <div className="hero-overlay"></div>
+                    <Header 
+                      user={user} 
+                      onAuthSuccess={handleUserLogin}
+                      onLogout={handleLogout}
+                      currentPage="main"
+                    />
+                    <MainContent />
+                  </div>
+                </div>
+                <DecorativeLine2 />
+                <Courses />
+                <DecorativeLine2 />
+                <Reviews />
+                <DecorativeLine2 />
+                <FAQ />
+                <DecorativeLine2 />
+                <Order />
+                <Footer />
+                <ScrollToTopButton />
+                <Assistant />
+              </>
+            } 
+          />
+        </Routes>
+      </div>
+    </BrowserRouter>
+  );
+}
 
 function setupSmoothScroll() {
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -35,132 +165,14 @@ function setupSmoothScroll() {
   });
 }
 
-
 const DecorativeLine2 = () => (
   <img src="/line2.svg" alt="Line" className="line2"/>
 );
 
-export function PromoBanner() {
-    const [timeLeft, setTimeLeft] = useState({
-        hours: 9,
-        minutes: 50,
-        seconds: 40
-    });
-    
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setTimeLeft(prevTime => {
-                let { hours, minutes, seconds } = prevTime;
-                
-
-
-
-                if (seconds > 0) {
-                    seconds -= 1;
-                } else {
-                    seconds = 59;
-                    if (minutes > 0) {
-                        minutes -= 1;
-                    } else {
-                        minutes = 59;
-                        if (hours > 0) {
-                            hours -= 1;
-                        } else {
-                            clearInterval(timer);
-                            return { hours: 0, minutes: 0, seconds: 0 };
-                        }
-                    }
-                }
-                
-                return { hours, minutes, seconds };
-            });
-        }, 1000);
-        
-        return () => clearInterval(timer);
-    }, []);
-    
-    const formatTime = (value) => {
-        return value < 10 ? `0${value}` : value;
-    };
-    
-    const scrollToCourse = () => {
-        const coursesSection = document.getElementById('programs');
-        if (coursesSection) {
-            const headerHeight = document.querySelector('.header')?.offsetHeight || 0;
-            const yOffset = -headerHeight - 20 + 260;
-            const y = coursesSection.getBoundingClientRect().top + window.pageYOffset + yOffset;
-            
-            window.scrollTo({
-                top: y,
-                behavior: 'smooth'
-            });
-        }
-    };
-    
-    return (
-        <div className="promo-banner">
-            <div className="promo-banner-inner">
-                <img src="/banner/left-icon.png" alt="" className="promo-icon-left"/>
-                <div className="promo-text">
-                    Вдохновляем скидками до 55%
-                </div>
-                <img src="/banner/sale-sa.png" alt="Promo Icon Right" className="promo-icon"/>
-                <div className="promo-right-block">
-                    <button className="promo-button" onClick={() => scrollToCourse()}>
-                        Выбрать курс
-                    </button>
-                    <div className="promo-timer">
-                        <span className="timer-label">До конца акции: </span>
-                        <span className="timer-value">
-                            {formatTime(timeLeft.hours)}:{formatTime(timeLeft.minutes)}:{formatTime(timeLeft.seconds)}
-                        </span>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    );
-}
-
-export function Header() {
+export function Header({ user, onAuthSuccess, onLogout, currentPage }) {
     const [showAuthModal, setShowAuthModal] = useState(false);
-    const [user, setUser] = useState(null);
     const [showUserMenu, setShowUserMenu] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
-    
-    // Получение данных пользователя при загрузке
-    useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                const userData = getUserFromToken();
-                if (userData) {
-                    try {
-                        const response = await fetch('http://localhost:3001/api/auth/user', {
-                            method: 'GET',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${localStorage.getItem('token')}`
-                            }
-                        });
-                        
-                        if (response.ok) {
-                            const data = await response.json();
-                            setUser(data.user);
-                        } else {
-                            // Если токен недействителен, удаляем его
-                            removeToken();
-                        }
-                    } catch (error) {
-                        console.error('Ошибка при проверке авторизации:', error);
-                    }
-                }
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        
-        checkAuth();
-    }, []);
+    const navigate = useNavigate();
     
     const scrollToSection = (id) => {
         const section = document.getElementById(id);
@@ -175,6 +187,27 @@ export function Header() {
             });
         }
     };
+
+    const handleNavigation = (sectionId) => {
+        if (currentPage === 'profile' || currentPage !== 'main') {
+            navigate('/#' + sectionId);
+            // Добавляем небольшую задержку для корректной прокрутки после навигации
+            setTimeout(() => {
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    const headerHeight = document.querySelector('.header')?.offsetHeight || 0;
+                    const yOffset = -headerHeight - 20 + 260;
+                    const y = section.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                    window.scrollTo({
+                        top: y,
+                        behavior: 'smooth'
+                    });
+                }
+            }, 100);
+        } else {
+            scrollToSection(sectionId);
+        }
+    };
     
     const toggleAuthModal = () => {
         setShowAuthModal(!showAuthModal);
@@ -186,42 +219,81 @@ export function Header() {
     };
     
     const handleLogout = () => {
-        removeToken();
-        setUser(null);
+        onLogout();
         setShowUserMenu(false);
-        window.location.reload();
     };
     
     const handleAuthSuccess = (userData) => {
-        setUser(userData);
+        onAuthSuccess(userData);
         setShowAuthModal(false);
     };
     
+    const handleProfileClick = () => {
+        console.log('Нажата кнопка профиля');
+        navigate('/profile');
+        setShowUserMenu(false);
+    };
+    
+    const handleLogoClick = (e) => {
+        e.preventDefault();
+        if (currentPage === 'profile' || currentPage !== 'main') {
+            navigate('/');
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
     return (
         <div className="header">
             <div className="container">
                 <div className="logo">
-                    <a href="#" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                    <a href="#" onClick={handleLogoClick}>
                         <span className="logo-text">KINGS COURSE</span>
                     </a>
                 </div>
                 <nav className="menu">
                     <ul className="menu_list">
-                        <li className="menu_item"><a href="#programs" onClick={(e) => { e.preventDefault(); scrollToSection('programs'); }}>Курсы</a></li>
-                        <li className="menu_item"><a href="#reviews" onClick={(e) => { e.preventDefault(); scrollToSection('reviews'); }}>Отзывы</a></li>
-                        <li className="menu_item"><a href="#order" onClick={(e) => { e.preventDefault(); scrollToSection('order'); }}>Записаться</a></li>
+                        <li className="menu_item">
+                            <a href="#programs" onClick={(e) => { 
+                                e.preventDefault();
+                                handleNavigation('programs');
+                            }}>Курсы</a>
+                        </li>
+                        <li className="menu_item">
+                            <a href="#reviews" onClick={(e) => { 
+                                e.preventDefault();
+                                handleNavigation('reviews');
+                            }}>Отзывы</a>
+                        </li>
+                        <li className="menu_item">
+                            <a href="#order" onClick={(e) => { 
+                                e.preventDefault();
+                                handleNavigation('order');
+                            }}>Записаться</a>
+                        </li>
                     </ul>
                 </nav>
                 
-                {isLoading ? (
-                    <div className="auth-loading">
-                        <div className="auth-loading-spinner"></div>
-                    </div>
-                ) : user ? (
+                {user ? (
                     <div className="user-profile">
                         <button className="user-button" onClick={toggleUserMenu}>
                             <span className="user-name">{user.name || user.email}</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg 
+                                xmlns="http://www.w3.org/2000/svg" 
+                                width="24" 
+                                height="24" 
+                                viewBox="0 0 24 24" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                strokeWidth="2" 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleProfileClick();
+                                }}
+                                className="user-icon"
+                            >
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                 <circle cx="12" cy="7" r="4"></circle>
                             </svg>
@@ -232,6 +304,9 @@ export function Header() {
                                 <div className="user-menu-item user-info">
                                     <div className="user-email">{user.email}</div>
                                     <span className="user-role">{user.role === 'STUDENT' ? 'Студент' : (user.role === 'TEACHER' ? 'Преподаватель' : 'Администратор')}</span>
+                                </div>
+                                <div className="user-menu-item">
+                                    <button className="user-menu-button" onClick={handleProfileClick}>Личный кабинет</button>
                                 </div>
                                 <div className="user-menu-item">
                                     <button className="user-menu-button" onClick={handleLogout}>Выйти</button>
@@ -495,7 +570,7 @@ export function MainContent() {
     };
     
     return (
-        <div className="main_content">
+        <div className="main_content" style={{ marginTop: '80px' }}>
             <div className="container">
                 <div className="main-info">
                     <h1 className="main-title">Овладейте любым языком.</h1>
@@ -891,49 +966,8 @@ export function Courses() {
         }
     ];
 
-    const [selectedCourse, setSelectedCourse] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [expandedSections, setExpandedSections] = useState([]);
+    const navigate = useNavigate();
     
-    const handleCardClick = (course) => {
-        setSelectedCourse(course);
-        setIsModalOpen(true);
-        setExpandedSections([]);
-    };
-    
-    const closeModal = () => {
-        setIsModalOpen(false);
-    };
-    
-    const toggleSection = (index) => {
-        setExpandedSections(prev => {
-            if (prev.includes(index)) {
-                return prev.filter(i => i !== index);
-            } else {
-                return [...prev, index];
-            }
-        });
-    };
-    
-    const scrollToOrder = () => {
-        const orderSection = document.getElementById('order');
-        if (orderSection) {
-            const headerHeight = document.querySelector('.header')?.offsetHeight || 0;
-            const yOffset = -headerHeight - 20 + 270;
-            const y = orderSection.getBoundingClientRect().top + window.pageYOffset + yOffset;
-            
-            window.scrollTo({
-                top: y,
-                behavior: 'smooth'
-            });
-            closeModal();
-            
-            if (selectedCourse && window.setCourseInOrderForm) {
-                window.setCourseInOrderForm(selectedCourse.title);
-            }
-        }
-    };
-
     useEffect(() => {
         document.querySelectorAll('.course-card.with-bg').forEach(card => {
             const bgImage = card.getAttribute('data-bg');
@@ -946,93 +980,47 @@ export function Courses() {
     }, []);
 
     return (
-        <section className="courses" id="programs">
-            <div className="common-title">Выберите программу</div>
-            <div className="container">
-                <Swiper
-                    modules={[Navigation, Pagination]}
-                    slidesPerView={3}
-                    spaceBetween={40}
-                    loop={true}
-                    navigation={true}
-                    pagination={false}
-                    className="swiper"
-                    breakpoints={{
-                        0: {
-                            slidesPerView: 1,
-                        },
-                        640: {
-                            slidesPerView: 2,
-                        },
-                        1024: {
-                            slidesPerView: 3,
-                        }
-                    }}
-                >
-                    {courses.map((course) => (
-                        <SwiperSlide key={course.id}>
-                            <div 
-                                className="course-card with-bg" 
-                                data-bg={course.image}
-                                onClick={() => handleCardClick(course)}
-                            >
-                                <div className="course-details">
-                                    <h3 className="course-title">{course.title}</h3>
+        <>
+            <section className="courses" id="programs">
+                <div className="common-title">Выберите программу</div>
+                <div className="container">
+                    <Swiper
+                        modules={[Navigation, Pagination]}
+                        slidesPerView={3}
+                        spaceBetween={40}
+                        loop={true}
+                        navigation={true}
+                        pagination={false}
+                        className="swiper"
+                        breakpoints={{
+                            0: {
+                                slidesPerView: 1,
+                            },
+                            640: {
+                                slidesPerView: 2,
+                            },
+                            1024: {
+                                slidesPerView: 3,
+                            }
+                        }}
+                    >
+                        {courses.map((course) => (
+                            <SwiperSlide key={course.id}>
+                                <div 
+                                    className="course-card with-bg" 
+                                    data-bg={course.image}
+                                    onClick={() => navigate(`/course/${course.id}`)}
+                                >
+                                    <div className="course-details">
+                                        <h3 className="course-title">{course.title}</h3>
+                                    </div>
                                 </div>
-                            </div>
-                        </SwiperSlide>
-                    ))}
-                </Swiper>
-            </div>
-            
-            {isModalOpen && selectedCourse && (
-                <div className="course-modal-overlay" onClick={closeModal}>
-                    <div className="course-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="course-modal-header">
-                            <button className="modal-close-btn modal-close-left" onClick={closeModal}>×</button>
-                            <h3>{selectedCourse.title}</h3>
-                            <div className="modal-header-space"></div>
-                        </div>
-                        <div className="course-modal-body">
-                            <p className="course-description">{selectedCourse.description}</p>
-                            
-                            <div className="course-program">
-                                <h4>Программа курса:</h4>
-                                <div className="program-accordion">
-                                    {selectedCourse.program.map((section, index) => (
-                                        <div key={index} className="program-section">
-                                            <div 
-                                                className={`program-header ${expandedSections.includes(index) ? 'expanded' : ''}`}
-                                                onClick={() => toggleSection(index)}
-                                            >
-                                                <h5>{section.title}</h5>
-                                                <span className="accordion-icon">
-                                                    {expandedSections.includes(index) ? '−' : '+'}
-                                                </span>
-                                            </div>
-                                            <div className={`program-content ${expandedSections.includes(index) ? 'expanded' : ''}`}>
-                                                <ul>
-                                                    {section.content.map((item, itemIndex) => (
-                                                        <li key={itemIndex}>{item}</li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            
-                            <button 
-                                className="button violet-button"
-                                onClick={scrollToOrder}
-                            >
-                                Записаться на курс
-                            </button>
-                        </div>
-                    </div>
+                            </SwiperSlide>
+                        ))}
+                    </Swiper>
                 </div>
-            )}
-        </section>
+            </section>
+        </>
     );
 }
 
@@ -1199,7 +1187,7 @@ export function FAQ() {
     );
 }
 
-export function OrderForm() {
+export function Order() {
     const [formData, setFormData] = useState({
         course: '',
         name: '',
@@ -1427,4 +1415,6 @@ export function ScrollToTopButton() {
         </>
     );
 }
+
+export default App;
 

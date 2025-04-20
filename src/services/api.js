@@ -1,7 +1,44 @@
-const API_URL = 'http://localhost:3001/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
-// Функция для выполнения HTTP-запросов
-async function fetchAPI(endpoint, options = {}) {
+// Кэш для хранения результатов запросов
+const cache = new Map();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 минут
+
+// Функция для проверки актуальности кэша
+const isCacheValid = (timestamp) => {
+  return Date.now() - timestamp < CACHE_DURATION;
+};
+
+// Функция для получения данных из кэша
+const getFromCache = (key) => {
+  const cached = cache.get(key);
+  if (cached && isCacheValid(cached.timestamp)) {
+    return cached.data;
+  }
+  cache.delete(key);
+  return null;
+};
+
+// Функция для сохранения данных в кэш
+const setCache = (key, data) => {
+  cache.set(key, {
+    data,
+    timestamp: Date.now()
+  });
+};
+
+// Класс для пользовательских ошибок API
+class APIError extends Error {
+  constructor(message, status, data = null) {
+    super(message);
+    this.name = 'APIError';
+    this.status = status;
+    this.data = data;
+  }
+}
+
+// Функция для выполнения HTTP-запросов с повторными попытками
+async function fetchWithRetry(endpoint, options = {}, retries = 3) {
   const token = localStorage.getItem('token');
   
   const headers = {
@@ -12,79 +49,142 @@ async function fetchAPI(endpoint, options = {}) {
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
+
+  const config = {
+    ...options,
+    headers,
+  };
+
+  let lastError;
   
-  try {
-    const response = await fetch(`${API_URL}${endpoint}`, {
-      ...options,
-      headers,
-    });
-    
-    // Если сервер вернул ответ, пробуем распарсить его как JSON
-    let data;
+  for (let i = 0; i < retries; i++) {
     try {
-      data = await response.json();
-    } catch (e) {
-      // Если не получилось распарсить JSON, используем текст ответа или дефолтное сообщение
-      throw new Error(await response.text() || 'Не удалось получить данные от сервера');
+      const response = await fetch(`${API_URL}${endpoint}`, config);
+      
+      let data;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        data = await response.text();
+      }
+
+      if (!response.ok) {
+        throw new APIError(
+          data.message || `Ошибка сервера: ${response.status}`,
+          response.status,
+          data
+        );
+      }
+
+      return data;
+    } catch (error) {
+      lastError = error;
+      
+      // Не повторяем запрос при определенных ошибках
+      if (error.status === 401 || error.status === 403 || error.status === 404) {
+        throw error;
+      }
+      
+      // Ждем перед повторной попыткой
+      if (i < retries - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, i)));
+      }
     }
-    
-    if (!response.ok) {
-      throw new Error(data.message || `Ошибка сервера: ${response.status}`);
-    }
-    
-    return data;
-  } catch (error) {
-    // Обработка ошибок сети
-    if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
-      throw new Error('Невозможно подключиться к серверу. Убедитесь, что сервер запущен.');
-    }
-    
-    // Пробрасываем остальные ошибки
-    throw error;
   }
+
+  throw lastError;
 }
 
-// Аутентификация
-export async function register(userData) {
-  return fetchAPI('/auth/register', {
-    method: 'POST',
-    body: JSON.stringify(userData),
-  });
+// Функция для выполнения GET-запросов с кэшированием
+async function fetchWithCache(endpoint, options = {}) {
+  const cacheKey = `${endpoint}${JSON.stringify(options)}`;
+  const cachedData = getFromCache(cacheKey);
+  
+  if (cachedData) {
+    return cachedData;
+  }
+
+  const data = await fetchWithRetry(endpoint, options);
+  setCache(cacheKey, data);
+  return data;
 }
 
+// API методы
 export async function login(credentials) {
-  return fetchAPI('/auth/login', {
+  return fetchWithRetry('/auth/login', {
     method: 'POST',
     body: JSON.stringify(credentials),
   });
 }
 
-export async function getCurrentUser() {
-  return fetchAPI('/auth/user');
+export async function register(userData) {
+  return fetchWithRetry('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(userData),
+  });
 }
 
-// Работа с курсами
-export async function getCourses() {
-  return fetchAPI('/courses');
+export async function getCourses(filters = {}) {
+  const queryString = new URLSearchParams(filters).toString();
+  return fetchWithCache(`/courses${queryString ? `?${queryString}` : ''}`);
+}
+
+export async function getCourseDetails(courseId) {
+  return fetchWithCache(`/courses/${courseId}`);
 }
 
 export async function createCourse(courseData) {
-  return fetchAPI('/courses', {
+  return fetchWithRetry('/courses', {
     method: 'POST',
     body: JSON.stringify(courseData),
   });
 }
 
-// Запись на курсы
-export async function enrollToCourse(courseId) {
-  return fetchAPI('/enrollments', {
+export async function updateCourse(courseId, courseData) {
+  return fetchWithRetry(`/courses/${courseId}`, {
+    method: 'PUT',
+    body: JSON.stringify(courseData),
+  });
+}
+
+export async function deleteCourse(courseId) {
+  return fetchWithRetry(`/courses/${courseId}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function getEnrollments() {
+  return fetchWithCache('/user/enrollments');
+}
+
+export async function enrollInCourse(courseId) {
+  return fetchWithRetry('/enrollments', {
     method: 'POST',
     body: JSON.stringify({ courseId }),
   });
 }
 
-export async function getUserEnrollments() {
-  return fetchAPI('/user/enrollments');
+// Работа с отзывами
+export async function createReview(reviewData) {
+  return fetchWithRetry('/reviews', {
+    method: 'POST',
+    body: JSON.stringify(reviewData),
+  });
+}
+
+export async function getCourseReviews(courseId) {
+  return fetchWithCache(`/courses/${courseId}/reviews`);
+}
+
+export async function getUserReviewForCourse(courseId) {
+  return fetchWithCache(`/courses/${courseId}/reviews/user`);
+}
+
+export async function deleteReview(reviewId) {
+  return fetchWithRetry(`/reviews/${reviewId}`, {
+    method: 'DELETE',
+  });
 }
 
 // Функции для работы с токеном
@@ -98,6 +198,11 @@ export function getToken() {
 
 export function removeToken() {
   localStorage.removeItem('token');
+  clearCache();
+}
+
+export function clearCache() {
+  cache.clear();
 }
 
 export function isAuthenticated() {
@@ -110,7 +215,6 @@ export function getUserFromToken() {
   if (!token) return null;
   
   try {
-    // Разбираем JWT токен
     const payload = token.split('.')[1];
     const decoded = JSON.parse(atob(payload));
     

@@ -15,44 +15,9 @@
    - Выберите локализацию по умолчанию
 3. Завершите установку и убедитесь, что сервис PostgreSQL запущен.
 
-### macOS
 
-1. Установите PostgreSQL с помощью Homebrew:
-   ```bash
-   brew install postgresql@16
-   ```
-2. Запустите сервис:
-   ```bash
-   brew services start postgresql@16
-   ```
-3. Создайте пользователя postgres с паролем:
-   ```bash
-   createuser -s postgres
-   psql -U postgres
-   ALTER USER postgres WITH PASSWORD '19189';
    ```
 
-### Linux (Ubuntu/Debian)
-
-1. Добавьте репозиторий PostgreSQL:
-   ```bash
-   sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-   wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-   sudo apt-get update
-   ```
-2. Установите PostgreSQL 16:
-   ```bash
-   sudo apt-get install postgresql-16
-   ```
-3. Запустите сервис:
-   ```bash
-   sudo systemctl start postgresql
-   ```
-4. Настройте пароль для пользователя postgres:
-   ```bash
-   sudo -u postgres psql
-   ALTER USER postgres WITH PASSWORD '19189';
-   ```
 
 ## 2. Создание базы данных
 

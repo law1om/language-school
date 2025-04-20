@@ -23,6 +23,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   enrollments Enrollment[]
+  reviews     Review[]
 }
 
 model Course {
@@ -34,6 +35,7 @@ model Course {
   updatedAt   DateTime @updatedAt
 
   enrollments Enrollment[]
+  reviews     Review[]
 }
 
 model Enrollment {
@@ -41,6 +43,21 @@ model Enrollment {
   userId    Int
   courseId  Int
   status    String   @default("active") // active, completed, cancelled
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id])
+  course Course @relation(fields: [courseId], references: [id])
+
+  @@unique([userId, courseId])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  text      String
+  rating    Int      @default(5) // Рейтинг от 1 до 5
+  userId    Int
+  courseId  Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

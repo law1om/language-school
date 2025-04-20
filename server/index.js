@@ -3,20 +3,39 @@ const cors = require('cors');
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
+const compression = require('compression');
+const helmet = require('helmet');
 require('dotenv').config();
 
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
-app.use(express.json());
-app.use(cors());
+// Middleware для безопасности и производительности
+app.use(helmet()); // Защита заголовков
+app.use(compression()); // Сжатие ответов
+app.use(express.json({ limit: '10kb' })); // Ограничение размера JSON
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:5174',
+  credentials: true
+}));
 
-// Эндпоинт для проверки работоспособности сервера
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'ok', message: 'Server is running' });
+// Ограничение количества запросов
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 минут
+  max: 100 // Максимум 100 запросов с одного IP
 });
+app.use('/api/', limiter);
+
+// Глобальная обработка ошибок
+const errorHandler = (err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.status || 500).json({
+    status: 'error',
+    message: err.message || 'Внутренняя ошибка сервера'
+  });
+};
 
 // Проверка соединения с базой данных
 async function checkConnection() {
@@ -29,39 +48,47 @@ async function checkConnection() {
   }
 }
 
-// Middleware для проверки авторизации
-const authMiddleware = async (req, res, next) => {
+// Middleware для проверки JWT
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ message: 'Требуется авторизация' });
+  }
+
   try {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) {
-      return res.status(401).json({ message: 'Не авторизован' });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId }
-    });
-
-    if (!user) {
-      return res.status(401).json({ message: 'Пользователь не найден' });
-    }
-
+    const user = jwt.verify(token, process.env.JWT_SECRET);
     req.user = user;
     next();
   } catch (error) {
-    return res.status(401).json({ message: 'Ошибка авторизации' });
+    return res.status(403).json({ message: 'Недействительный токен' });
   }
 };
 
-// Middleware для проверки роли
-const roleMiddleware = (roles) => {
-  return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ message: 'Недостаточно прав' });
-    }
-    next();
-  };
-};
+// Эндпоинт для проверки здоровья сервера
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Применяем обработчик ошибок
+app.use(errorHandler);
+
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+  console.log('Получен сигнал SIGTERM. Выполняется graceful shutdown...');
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+// Запуск сервера
+const server = app.listen(PORT, async () => {
+  await checkConnection();
+  console.log(`Сервер запущен на порту ${PORT}`);
+});
+
+// Настройка таймаута сервера
+server.timeout = 30000; // 30 секунд
 
 // Маршруты для аутентификации
 app.post('/api/auth/register', async (req, res) => {
@@ -154,10 +181,10 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // Добавляем эндпоинт для получения информации о текущем пользователе
-app.get('/api/auth/user', authMiddleware, async (req, res) => {
+app.get('/api/auth/user', authenticateToken, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
-      where: { id: req.user.id },
+      where: { id: req.user.userId },
       select: {
         id: true,
         name: true,
@@ -189,7 +216,7 @@ app.get('/api/courses', async (req, res) => {
   }
 });
 
-app.post('/api/courses', authMiddleware, roleMiddleware(['ADMIN', 'TEACHER']), async (req, res) => {
+app.post('/api/courses', authenticateToken, async (req, res) => {
   try {
     const { title, description, imageUrl } = req.body;
     const course = await prisma.course.create({
@@ -207,10 +234,10 @@ app.post('/api/courses', authMiddleware, roleMiddleware(['ADMIN', 'TEACHER']), a
 });
 
 // Маршруты для записи на курсы
-app.post('/api/enrollments', authMiddleware, async (req, res) => {
+app.post('/api/enrollments', authenticateToken, async (req, res) => {
   try {
     const { courseId } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     // Проверка существования курса
     const course = await prisma.course.findUnique({
@@ -248,9 +275,9 @@ app.post('/api/enrollments', authMiddleware, async (req, res) => {
   }
 });
 
-app.get('/api/user/enrollments', authMiddleware, async (req, res) => {
+app.get('/api/user/enrollments', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const enrollments = await prisma.enrollment.findMany({
       where: { userId },
       include: { course: true }
@@ -262,8 +289,137 @@ app.get('/api/user/enrollments', authMiddleware, async (req, res) => {
   }
 });
 
-// Запуск сервера
-app.listen(PORT, async () => {
-  await checkConnection();
-  console.log(`Сервер запущен на порту ${PORT}`);
+// Маршруты для отзывов
+app.post('/api/reviews', authenticateToken, async (req, res) => {
+  try {
+    const { courseId, text, rating } = req.body;
+    const userId = req.user.userId;
+
+    // Проверка существования курса
+    const course = await prisma.course.findUnique({
+      where: { id: parseInt(courseId) }
+    });
+
+    if (!course) {
+      return res.status(404).json({ message: 'Курс не найден' });
+    }
+
+    // Проверка, не оставлял ли пользователь уже отзыв для этого курса
+    const existingReview = await prisma.review.findFirst({
+      where: {
+        userId,
+        courseId: parseInt(courseId)
+      }
+    });
+
+    if (existingReview) {
+      // Обновляем существующий отзыв
+      const updatedReview = await prisma.review.update({
+        where: { id: existingReview.id },
+        data: {
+          text,
+          rating: parseInt(rating)
+        }
+      });
+      return res.status(200).json(updatedReview);
+    }
+
+    // Создание нового отзыва
+    const review = await prisma.review.create({
+      data: {
+        text,
+        rating: parseInt(rating),
+        userId,
+        courseId: parseInt(courseId)
+      }
+    });
+
+    res.status(201).json(review);
+  } catch (error) {
+    console.error('Ошибка при создании отзыва:', error);
+    res.status(500).json({ message: 'Ошибка сервера при создании отзыва' });
+  }
+});
+
+// Получение всех отзывов для курса
+app.get('/api/courses/:courseId/reviews', async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    
+    const reviews = await prisma.review.findMany({
+      where: { courseId: parseInt(courseId) },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+    
+    res.status(200).json(reviews);
+  } catch (error) {
+    console.error('Ошибка при получении отзывов:', error);
+    res.status(500).json({ message: 'Ошибка сервера при получении отзывов' });
+  }
+});
+
+// Получение отзыва пользователя для курса
+app.get('/api/courses/:courseId/reviews/user', authenticateToken, async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const userId = req.user.userId;
+    
+    const review = await prisma.review.findFirst({
+      where: {
+        courseId: parseInt(courseId),
+        userId
+      }
+    });
+    
+    if (!review) {
+      return res.status(404).json({ message: 'Отзыв не найден' });
+    }
+    
+    res.status(200).json(review);
+  } catch (error) {
+    console.error('Ошибка при получении отзыва пользователя:', error);
+    res.status(500).json({ message: 'Ошибка сервера при получении отзыва пользователя' });
+  }
+});
+
+// Удаление отзыва
+app.delete('/api/reviews/:reviewId', authenticateToken, async (req, res) => {
+  try {
+    const { reviewId } = req.params;
+    const userId = req.user.userId;
+    
+    // Находим отзыв
+    const review = await prisma.review.findUnique({
+      where: { id: parseInt(reviewId) }
+    });
+    
+    if (!review) {
+      return res.status(404).json({ message: 'Отзыв не найден' });
+    }
+    
+    // Проверяем права пользователя (может удалить только свой отзыв или админ)
+    if (review.userId !== userId && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Недостаточно прав для удаления отзыва' });
+    }
+    
+    // Удаляем отзыв
+    await prisma.review.delete({
+      where: { id: parseInt(reviewId) }
+    });
+    
+    res.status(200).json({ message: 'Отзыв успешно удален' });
+  } catch (error) {
+    console.error('Ошибка при удалении отзыва:', error);
+    res.status(500).json({ message: 'Ошибка сервера при удалении отзыва' });
+  }
 }); 
