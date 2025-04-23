@@ -74,6 +74,85 @@ app.get('/api/health', (req, res) => {
 // Применяем обработчик ошибок
 app.use(errorHandler);
 
+// Эндпоинт для заполнения базы данных демонстрационными данными
+app.post('/api/seed-database', async (req, res) => {
+  try {
+    // Проверяем, есть ли уже курсы в базе
+    const coursesCount = await prisma.course.count();
+    
+    if (coursesCount > 0) {
+      return res.status(400).json({ message: 'База данных уже содержит курсы' });
+    }
+    
+    // Демонстрационные курсы
+    const demoCourses = [
+      {
+        title: "Английский язык",
+        description: "Погрузись в мир английского! Курсы для всех уровней от начинающих до продвинутых. Разговорная практика с носителями и подготовка к международным экзаменам.",
+        imageUrl: "/courses-bg/eng-bg.avif"
+      },
+      {
+        title: "Немецкий язык",
+        description: "Открой для себя язык Гёте! Грамматика и произношение с нуля, бизнес-немецкий и подготовка к Goethe-Zertifikat.",
+        imageUrl: "/courses-bg/ger-bg.avif"
+      },
+      {
+        title: "Французский язык",
+        description: "Говори, как парижанин! Французский с нуля до продвинутого уровня. Подготовка к DELF/DALF и разговорные клубы.",
+        imageUrl: "/courses-bg/fr-bg.avif"
+      },
+      {
+        title: "Испанский язык",
+        description: "Почувствуй страсть Испании! Особенности испанского в Латинской Америке и Испании, подготовка к DELE и изучение культуры испаноязычных стран.",
+        imageUrl: "/courses-bg/esp-bg.avif"
+      },
+      {
+        title: "Итальянский язык",
+        description: "Говори, как в Италии! Итальянский для путешествий, изучение музыки и кино на итальянском, погружение в культуру.",
+        imageUrl: "/courses-bg/italy-bg.avif"
+      },
+      {
+        title: "Японский язык",
+        description: "Погрузись в культуру Японии! Занятия с носителями языка, подготовка к JLPT (N5–N1) и практика через чтение манги.",
+        imageUrl: "/courses-bg/japon-bg.avif"
+      },
+      {
+        title: "Китайский язык",
+        description: "Откройте для себя язык будущего! Изучение иероглифов с нуля, подготовка к HSK (1-6) и бизнес-китайский.",
+        imageUrl: "/courses-bg/china-bg.avif"
+      },
+      {
+        title: "Корейский язык",
+        description: "Погрузитесь в K-culture! Изучение корейского алфавита и грамматики, подготовка к TOPIK и погружение в мир K-pop.",
+        imageUrl: "/courses-bg/korea-bg.avif"
+      },
+      {
+        title: "Арабский язык",
+        description: "Изучите язык Ближнего Востока! Арабский алфавит и каллиграфия, изучение диалектов и культуры арабских стран.",
+        imageUrl: "/courses-bg/arab-bg.avif"
+      },
+      {
+        title: "Португальский язык",
+        description: "Откройте мир лузофонии! Изучение особенностей португальского в Португалии и Бразилии, подготовка к CAPLE.",
+        imageUrl: "/courses-bg/portugal-bg.avif"
+      }
+    ];
+    
+    // Добавляем курсы в базу данных
+    const createdCourses = await prisma.course.createMany({
+      data: demoCourses
+    });
+    
+    res.status(201).json({ 
+      message: `Добавлено ${createdCourses.count} демонстрационных курсов в базу данных`,
+      coursesCount: createdCourses.count
+    });
+  } catch (error) {
+    console.error('Ошибка при заполнении базы данных:', error);
+    res.status(500).json({ message: 'Ошибка сервера при заполнении базы данных' });
+  }
+});
+
 // Graceful shutdown
 process.on('SIGTERM', async () => {
   console.log('Получен сигнал SIGTERM. Выполняется graceful shutdown...');
@@ -213,6 +292,84 @@ app.get('/api/courses', async (req, res) => {
   } catch (error) {
     console.error('Ошибка при получении курсов:', error);
     res.status(500).json({ message: 'Ошибка сервера при получении курсов' });
+  }
+});
+
+// Получение деталей конкретного курса
+app.get('/api/courses/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const courseId = parseInt(id);
+    
+    // Данные демонстрационных курсов из фронтенда для случая, если курса нет в базе
+    const demoCoursesData = [
+      { id: 1, title: "Английский язык", description: "Погрузись в мир английского!", image: "/courses-bg/eng-bg.avif" },
+      { id: 2, title: "Немецкий язык", description: "Открой для себя язык Гёте!", image: "/courses-bg/ger-bg.avif" },
+      { id: 3, title: "Французский язык", description: "Говори, как парижанин!", image: "/courses-bg/fr-bg.avif" },
+      { id: 4, title: "Испанский язык", description: "Почувствуй страсть Испании!", image: "/courses-bg/esp-bg.avif" },
+      { id: 5, title: "Итальянский язык", description: "Говори, как в Италии!", image: "/courses-bg/italy-bg.avif" },
+      { id: 6, title: "Японский язык", description: "Погрузись в культуру Японии!", image: "/courses-bg/japon-bg.avif" },
+      { id: 7, title: "Китайский язык", description: "Откройте для себя язык будущего!", image: "/courses-bg/china-bg.avif" },
+      { id: 8, title: "Корейский язык", description: "Погрузитесь в K-culture!", image: "/courses-bg/korea-bg.avif" },
+      { id: 9, title: "Арабский язык", description: "Изучите язык Ближнего Востока!", image: "/courses-bg/arab-bg.avif" },
+      { id: 10, title: "Португальский язык", description: "Откройте мир лузофонии!", image: "/courses-bg/portugal-bg.avif" }
+    ];
+    
+    // Пробуем найти курс в базе данных
+    let course = await prisma.course.findUnique({
+      where: { id: courseId },
+      include: {
+        reviews: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true
+              }
+            }
+          }
+        }
+      }
+    });
+    
+    // Если курс не найден в базе, но есть в демо-данных
+    if (!course && courseId >= 1 && courseId <= demoCoursesData.length) {
+      const demoData = demoCoursesData[courseId - 1];
+      
+      // Создаем объект курса из демо-данных
+      course = {
+        id: demoData.id,
+        title: demoData.title,
+        description: demoData.description,
+        imageUrl: demoData.image,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        reviews: []
+      };
+    }
+    
+    // Если курс не найден ни в базе, ни в демо-данных
+    if (!course) {
+      return res.status(404).json({ message: 'Курс не найден' });
+    }
+    
+    // Расчет среднего рейтинга
+    let averageRating = 0;
+    if (course.reviews && course.reviews.length > 0) {
+      averageRating = course.reviews.reduce((sum, review) => sum + review.rating, 0) / course.reviews.length;
+    }
+    
+    // Добавляем подробные данные для фронтенда
+    const courseData = {
+      ...course,
+      averageRating,
+      reviewsCount: course.reviews ? course.reviews.length : 0
+    };
+    
+    res.status(200).json(courseData);
+  } catch (error) {
+    console.error('Ошибка при получении деталей курса:', error);
+    res.status(500).json({ message: 'Ошибка сервера при получении деталей курса' });
   }
 });
 

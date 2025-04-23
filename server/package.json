@@ -8,7 +8,8 @@
     "dev": "nodemon index.js",
     "prisma:migrate": "prisma migrate dev",
     "prisma:generate": "prisma generate",
-    "prisma:reset": "prisma migrate reset"
+    "prisma:reset": "prisma migrate reset",
+    "seed": "node prisma/seed.js"
   },
   "keywords": [
     "express",

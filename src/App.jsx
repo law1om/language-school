@@ -11,6 +11,8 @@ import UserProfile from './components/UserProfile';
 import { register, login, setToken, getUserFromToken, removeToken } from './services/api';
 import { Route, Routes, Link, useNavigate, BrowserRouter } from 'react-router-dom';
 import CoursePage from './components/CoursePage';
+import ReviewsPage from './pages/ReviewsPage';
+import FaqPage from './pages/FaqPage';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -105,6 +107,40 @@ function App() {
             } 
           />
           <Route 
+            path="/reviews" 
+            element={
+              <>
+                <Header 
+                  user={user} 
+                  onAuthSuccess={handleUserLogin}
+                  onLogout={handleLogout}
+                  currentPage="reviews"
+                />
+                <ReviewsPage />
+                <Footer />
+                <ScrollToTopButton />
+                <Assistant />
+              </>
+            } 
+          />
+          <Route 
+            path="/faq" 
+            element={
+              <>
+                <Header 
+                  user={user} 
+                  onAuthSuccess={handleUserLogin}
+                  onLogout={handleLogout}
+                  currentPage="faq"
+                />
+                <FaqPage />
+                <Footer />
+                <ScrollToTopButton />
+                <Assistant />
+              </>
+            } 
+          />
+          <Route 
             path="/" 
             element={
               <>
@@ -122,10 +158,6 @@ function App() {
                 </div>
                 <DecorativeLine2 />
                 <Courses />
-                <DecorativeLine2 />
-                <Reviews />
-                <DecorativeLine2 />
-                <FAQ />
                 <DecorativeLine2 />
                 <Order />
                 <Footer />
@@ -260,10 +292,16 @@ export function Header({ user, onAuthSuccess, onLogout, currentPage }) {
                             }}>Курсы</a>
                         </li>
                         <li className="menu_item">
-                            <a href="#reviews" onClick={(e) => { 
+                            <a href="/reviews" onClick={(e) => { 
                                 e.preventDefault();
-                                handleNavigation('reviews');
+                                navigate('/reviews');
                             }}>Отзывы</a>
+                        </li>
+                        <li className="menu_item">
+                            <a href="/faq" onClick={(e) => { 
+                                e.preventDefault();
+                                navigate('/faq');
+                            }}>FAQ</a>
                         </li>
                         <li className="menu_item">
                             <a href="#order" onClick={(e) => { 

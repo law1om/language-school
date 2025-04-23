@@ -4,32 +4,35 @@ import ReviewForm from './ReviewForm';
 import ReviewsList from './ReviewsList';
 import './CourseReviews.css';
 
-const CourseReviews = ({ courseId }) => {
+function CourseReviews({ courseId }) {
   const [refreshReviews, setRefreshReviews] = useState(0);
-  const isLoggedIn = isAuthenticated();
-
+  
   const handleReviewSubmitted = () => {
+    // Увеличиваем счетчик, чтобы обновить список отзывов
     setRefreshReviews(prev => prev + 1);
   };
 
   return (
-    <div className="course-reviews-container">
-      <h2>Отзывы о курсе</h2>
+    <div className="course-reviews-section">
+      <h2 className="section-title">Отзывы о курсе</h2>
       
-      {isLoggedIn ? (
+      {isAuthenticated() ? (
         <ReviewForm 
           courseId={courseId} 
           onReviewSubmitted={handleReviewSubmitted} 
         />
       ) : (
-        <div className="login-prompt">
-          <p>Чтобы оставить отзыв, пожалуйста, авторизуйтесь.</p>
+        <div className="auth-message">
+          <p>Чтобы оставить отзыв, необходимо <a href="#" className="login-link">войти</a> или <a href="#" className="register-link">зарегистрироваться</a>.</p>
         </div>
       )}
       
-      <ReviewsList courseId={courseId} refresh={refreshReviews} />
+      <ReviewsList 
+        courseId={courseId} 
+        key={refreshReviews} // Ключ для обновления при добавлении отзыва
+      />
     </div>
   );
-};
+}
 
 export default CourseReviews; 

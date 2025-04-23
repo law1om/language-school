@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { getCourseDetails, enrollInCourse, isAuthenticated } from '../services/api';
+import CourseReviews from './CourseReviews';
 import './CoursePage.css';
 
-const CoursePage = () => {
+function CoursePage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [course, setCourse] = useState(null);
   const [expandedSections, setExpandedSections] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+  const [error, setError] = useState('');
+  const [enrolling, setEnrolling] = useState(false);
 
-  const courses = [
+  // Демонстрационные данные для UI
+  const coursesData = [
     {
       id: 1,
       image: "/courses-bg/eng-bg.avif",
@@ -384,15 +388,33 @@ const CoursePage = () => {
   ];
 
   useEffect(() => {
-    // Находим курс по ID из параметров URL
-    const courseId = parseInt(id);
-    const foundCourse = courses.find(c => c.id === courseId);
-    
-    if (foundCourse) {
-      setCourse(foundCourse);
+    const fetchCourseDetails = async () => {
+      try {
+        setLoading(true);
+        // Получаем данные курса с сервера
+        const courseData = await getCourseDetails(id);
+        
+        // Находим демонстрационные данные для UI
+        const demoData = coursesData.find(c => c.id === parseInt(id)) || coursesData[0];
+        
+        // Объединяем данные с сервера и демо-данные для UI
+        setCourse({
+          ...courseData,
+          image: demoData.image,
+          features: demoData.features,
+          program: demoData.program
+        });
+      } catch (error) {
+        console.error('Ошибка при загрузке курса:', error);
+        setError('Не удалось загрузить данные курса. Пожалуйста, попробуйте позже.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchCourseDetails();
     }
-    
-    setLoading(false);
   }, [id]);
 
   const toggleSection = (index) => {
@@ -429,12 +451,41 @@ const CoursePage = () => {
     navigate(-1);
   };
 
+  const handleEnroll = async () => {
+    if (!isAuthenticated()) {
+      alert('Для записи на курс необходимо авторизоваться');
+      return;
+    }
+
+    try {
+      setEnrolling(true);
+      await enrollInCourse(id);
+      alert('Вы успешно записались на курс!');
+    } catch (error) {
+      console.error('Ошибка при записи на курс:', error);
+      alert(error.message || 'Не удалось записаться на курс. Пожалуйста, попробуйте позже.');
+    } finally {
+      setEnrolling(false);
+    }
+  };
+
   if (loading) {
-    return <div className="course-page-loading">Загрузка...</div>;
+    return (
+      <div className="course-page-loading">
+        <div className="loading-spinner"></div>
+        <p>Загрузка информации о курсе...</p>
+      </div>
+    );
   }
 
-  if (!course) {
-    return <div className="course-not-found">Курс не найден</div>;
+  if (error || !course) {
+    return (
+      <div className="course-page-error">
+        <h2>Ошибка</h2>
+        <p>{error || 'Курс не найден'}</p>
+        <a href="/" className="btn-back">Вернуться на главную</a>
+      </div>
+    );
   }
 
   return (
@@ -495,7 +546,7 @@ const CoursePage = () => {
           <div className="other-courses">
             <h2>Другие курсы</h2>
             <div className="courses-icons">
-              {courses.filter(c => c.id !== course.id).map(otherCourse => (
+              {coursesData.filter(c => c.id !== course.id).map(otherCourse => (
                 <div 
                   key={otherCourse.id} 
                   className="course-icon" 
@@ -509,8 +560,14 @@ const CoursePage = () => {
           </div>
         </div>
       </div>
+      
+      <div className="course-reviews">
+        <div className="container">
+          <CourseReviews courseId={id} />
+        </div>
+      </div>
     </div>
   );
-};
+}
 
 export default CoursePage; 

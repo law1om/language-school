@@ -1,79 +1,131 @@
 import React, { useState, useEffect } from 'react';
-import { createReview, getUserReviewForCourse } from '../services/api';
+import { createReview, getUserReviewForCourse, deleteReview } from '../services/api';
 import './ReviewForm.css';
 
-const ReviewForm = ({ courseId, onReviewSubmitted }) => {
-  const [reviewText, setReviewText] = useState('');
+function ReviewForm({ courseId, onReviewSubmitted }) {
   const [rating, setRating] = useState(5);
+  const [text, setText] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [existingReview, setExistingReview] = useState(null);
+  const [userReview, setUserReview] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
 
-
+  // Загрузка существующего отзыва пользователя
   useEffect(() => {
-    const loadUserReview = async () => {
+    async function fetchUserReview() {
       try {
         const review = await getUserReviewForCourse(courseId);
         if (review) {
-          setExistingReview(review);
-          setReviewText(review.text);
-          setRating(review.rating);
+          setUserReview(review);
+          // Заполняем форму, если переходим в режим редактирования
+          if (isEditing) {
+            setText(review.text);
+            setRating(review.rating);
+          }
         }
       } catch (error) {
-
-        if (!error.message.includes('Отзыв не найден')) {
-          console.error('Ошибка при загрузке отзыва пользователя:', error);
-        }
+        console.error('Ошибка при загрузке отзыва:', error);
       }
-    };
+    }
 
-    loadUserReview();
-  }, [courseId]);
+    if (courseId) {
+      fetchUserReview();
+    }
+  }, [courseId, isEditing]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!reviewText.trim()) {
-      setError('Пожалуйста, введите текст отзыва');
+    if (!text.trim()) {
+      setError('Пожалуйста, добавьте текст отзыва');
       return;
     }
-    
-    setLoading(true);
-    setError('');
-    
+
     try {
-      const reviewData = {
+      setLoading(true);
+      setError('');
+      
+      await createReview({
         courseId,
-        text: reviewText.trim(),
+        text,
         rating
-      };
+      });
       
-      const result = await createReview(reviewData);
+      setText('');
+      setRating(5);
+      setIsEditing(false);
       
+      // Обновляем список отзывов
       if (onReviewSubmitted) {
-        onReviewSubmitted(result);
+        onReviewSubmitted();
       }
       
-      setExistingReview(result);
-      setError('');
     } catch (error) {
-      setError(error.message || 'Не удалось сохранить отзыв');
+      console.error('Ошибка при отправке отзыва:', error);
+      setError('Не удалось отправить отзыв. Пожалуйста, попробуйте позже.');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleDelete = async () => {
+    if (!userReview) return;
+    
+    if (!window.confirm('Вы действительно хотите удалить свой отзыв?')) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await deleteReview(userReview.id);
+      setUserReview(null);
+      
+      // Обновляем список отзывов
+      if (onReviewSubmitted) {
+        onReviewSubmitted();
+      }
+    } catch (error) {
+      console.error('Ошибка при удалении отзыва:', error);
+      setError('Не удалось удалить отзыв. Пожалуйста, попробуйте позже.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Если у пользователя есть отзыв и он не в режиме редактирования
+  if (userReview && !isEditing) {
+    return (
+      <div className="user-review">
+        <h3>Ваш отзыв</h3>
+        <div className="review-rating">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <span key={star} className={star <= userReview.rating ? 'star filled' : 'star'}>★</span>
+          ))}
+        </div>
+        <p className="review-text">{userReview.text}</p>
+        <div className="review-actions">
+          <button className="edit-button" onClick={() => setIsEditing(true)}>
+            Редактировать
+          </button>
+          <button className="delete-button" onClick={handleDelete}>
+            Удалить
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="review-form-container">
-      <h3>{existingReview ? 'Ваш отзыв' : 'Оставить отзыв'}</h3>
-      <form onSubmit={handleSubmit} className="review-form">
-        <div className="rating-container">
-          <label>Оценка:</label>
-          <div className="rating-stars">
+    <div className="review-form">
+      <h3>{isEditing ? 'Редактировать отзыв' : 'Оставить отзыв'}</h3>
+      <form onSubmit={handleSubmit}>
+        <div className="rating-selector">
+          <p>Ваша оценка:</p>
+          <div className="stars">
             {[1, 2, 3, 4, 5].map((star) => (
               <span
                 key={star}
-                className={`star ${star <= rating ? 'filled' : ''}`}
+                className={star <= rating ? 'star filled' : 'star'}
                 onClick={() => setRating(star)}
               >
                 ★
@@ -83,25 +135,40 @@ const ReviewForm = ({ courseId, onReviewSubmitted }) => {
         </div>
         
         <div className="form-group">
-          <label htmlFor="reviewText">Ваш отзыв:</label>
+          <label htmlFor="review-text">Ваш отзыв:</label>
           <textarea
-            id="reviewText"
-            value={reviewText}
-            onChange={(e) => setReviewText(e.target.value)}
-            rows="4"
-            placeholder="Поделитесь своим опытом..."
-            disabled={loading}
-          />
+            id="review-text"
+            className="review-text-input"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            rows="5"
+            placeholder="Поделитесь своими впечатлениями о курсе..."
+          ></textarea>
         </div>
         
         {error && <div className="error-message">{error}</div>}
         
-        <button type="submit" className="submit-btn" disabled={loading}>
-          {loading ? 'Сохранение...' : existingReview ? 'Обновить отзыв' : 'Отправить отзыв'}
-        </button>
+        <div className="form-actions">
+          {isEditing && (
+            <button 
+              type="button" 
+              className="cancel-button"
+              onClick={() => setIsEditing(false)}
+            >
+              Отмена
+            </button>
+          )}
+          <button 
+            type="submit" 
+            className="submit-button"
+            disabled={loading}
+          >
+            {loading ? 'Отправка...' : (isEditing ? 'Сохранить изменения' : 'Отправить отзыв')}
+          </button>
+        </div>
       </form>
     </div>
   );
-};
+}
 
 export default ReviewForm; 
