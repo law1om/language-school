@@ -134,26 +134,6 @@ export async function getCourseDetails(courseId) {
   return fetchWithCache(`/courses/${courseId}`);
 }
 
-export async function createCourse(courseData) {
-  return fetchWithRetry('/courses', {
-    method: 'POST',
-    body: JSON.stringify(courseData),
-  });
-}
-
-export async function updateCourse(courseId, courseData) {
-  return fetchWithRetry(`/courses/${courseId}`, {
-    method: 'PUT',
-    body: JSON.stringify(courseData),
-  });
-}
-
-export async function deleteCourse(courseId) {
-  return fetchWithRetry(`/courses/${courseId}`, {
-    method: 'DELETE',
-  });
-}
-
 export async function getEnrollments() {
   return fetchWithCache('/user/enrollments');
 }
@@ -198,33 +178,37 @@ export function getToken() {
 
 export function removeToken() {
   localStorage.removeItem('token');
-  clearCache();
-}
-
-export function clearCache() {
   cache.clear();
 }
 
 export function isAuthenticated() {
-  return !!getToken();
+  return !!localStorage.getItem('token');
 }
 
-// Функция для получения данных о пользователе из токена
 export function getUserFromToken() {
-  const token = getToken();
+  const token = localStorage.getItem('token');
   if (!token) return null;
   
   try {
-    const payload = token.split('.')[1];
-    const decoded = JSON.parse(atob(payload));
+    // Для JWT токенов - декодирование payload (середина токена)
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(window.atob(base64));
     
-    return {
-      id: decoded.userId,
-      email: decoded.email,
-      role: decoded.role,
-    };
+    return payload.user;
   } catch (error) {
-    console.error('Ошибка при получении данных пользователя из токена', error);
+    console.error('Ошибка при расшифровке токена:', error);
     return null;
   }
+}
+
+export async function getCourseLearningMaterials(courseId) {
+  return fetchWithCache(`/courses/${courseId}/learning`);
+}
+
+export async function updateUserCourseProgress(courseId, data) {
+  return fetchWithRetry(`/courses/${courseId}/progress`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
 } 

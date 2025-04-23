@@ -118,10 +118,10 @@ function UserProfile({ user }) {
                           className="course-link"
                           onClick={(e) => {
                             e.preventDefault();
-                            navigate(`/course/${enrollment.courseId}`);
+                            navigate(`/course/${enrollment.courseId}/learn`);
                           }}
                         >
-                          Перейти к курсу
+                          Продолжить обучение
                         </a>
                       </div>
                     ))}

@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { getCourseReviews, deleteReview, isAuthenticated, getUserFromToken } from '../services/api';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination } from 'swiper/modules';
+import mockReviews from '../services/mockReviews';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 import './ReviewsList.css';
 
 const ReviewsList = ({ courseId, refresh }) => {
@@ -14,8 +20,23 @@ const ReviewsList = ({ courseId, refresh }) => {
       
       try {
         setLoading(true);
-        const data = await getCourseReviews(courseId);
-        setReviews(data || []);
+        // Используем мок-данные вместо API-запроса
+        const mockData = mockReviews[courseId] || [];
+        
+        // Если есть данные с сервера, использовать их
+        try {
+          const serverData = await getCourseReviews(courseId);
+          if (serverData && serverData.length > 0) {
+            setReviews(serverData);
+          } else {
+            // Иначе используем мок-данные
+            setReviews(mockData);
+          }
+        } catch (err) {
+          console.log('Используем мок-данные отзывов');
+          setReviews(mockData);
+        }
+        
         setError('');
       } catch (error) {
         console.error('Ошибка при загрузке отзывов:', error);
@@ -26,7 +47,7 @@ const ReviewsList = ({ courseId, refresh }) => {
     };
 
     fetchReviews();
-  }, [courseId]);
+  }, [courseId, refresh]);
   
   const handleDeleteReview = async (reviewId) => {
     if (!window.confirm('Вы уверены, что хотите удалить этот отзыв?')) {
@@ -99,45 +120,57 @@ const ReviewsList = ({ courseId, refresh }) => {
       </div>
 
       <div className="reviews-container">
-        {reviews.map((review) => (
-          <div key={review.id} className="review-item">
-            <div className="review-header">
-              <div className="review-user">
-                <div className="user-avatar">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
+        <Swiper
+          modules={[Navigation, Pagination]}
+          slidesPerView={1}
+          navigation={true}
+          loop={true}
+          pagination={false}
+          breakpoints={{
+            640: {
+              slidesPerView: 1,
+              spaceBetween: 20,
+            },
+            768: {
+              slidesPerView: 2,
+              spaceBetween: 25,
+            },
+            1024: {
+              slidesPerView: 3,
+              spaceBetween: 30,
+            },
+          }}
+        >
+          {reviews.map((review) => (
+            <SwiperSlide key={review.id}>
+              <div className="review-card">
+                <div className="review-header">
+                  <div className="review-avatar">
+                    {review.user?.name?.charAt(0) || 'С'}
+                  </div>
+                  <div className="review-info">
+                    <div className="review-name">{review.user?.name || 'Студент'}</div>
+                    <div className="review-course">{formatDate(review.createdAt)}</div>
+                    <div className="review-rating">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        star <= review.rating ? '★' : '☆'
+                      )).join('')}
+                    </div>
+                  </div>
                 </div>
-                <div className="user-info">
-                  <h4 className="user-name">{review.user?.name || 'Студент'}</h4>
-                  <p className="review-date">{formatDate(review.createdAt)}</p>
-                </div>
-              </div>
-              <div className="review-rating">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <span 
-                    key={star} 
-                    className={star <= review.rating ? 'star filled' : 'star'}
+                <p className="review-text">{review.text}</p>
+                {isAuthenticated() && (currentUser?.id === review.userId || currentUser?.role === 'ADMIN') && (
+                  <button 
+                    className="delete-review-btn" 
+                    onClick={() => handleDeleteReview(review.id)}
                   >
-                    ★
-                  </span>
-                ))}
+                    Удалить
+                  </button>
+                )}
               </div>
-            </div>
-            <div className="review-content">
-              <p className="review-text">{review.text}</p>
-            </div>
-            {isAuthenticated() && (currentUser?.id === review.userId || currentUser?.role === 'ADMIN') && (
-              <button 
-                className="delete-review-btn" 
-                onClick={() => handleDeleteReview(review.id)}
-              >
-                Удалить
-              </button>
-            )}
-          </div>
-        ))}
+            </SwiperSlide>
+          ))}
+        </Swiper>
       </div>
     </div>
   );

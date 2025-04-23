@@ -53,6 +53,10 @@ function FaqPage() {
 
   return (
     <div className="faq-page">
+      <div className="faq-decoration">
+        <img src="/line1.svg" alt="" style={{ position: 'absolute', top: 0, left: 0, width: '100%' }} />
+      </div>
+      
       <div className="container">
         <h1 className="page-title">Часто задаваемые вопросы</h1>
         <p className="page-description">
@@ -85,9 +89,8 @@ function FaqPage() {
         <div className="faq-contact">
           <h2>Не нашли ответ на свой вопрос?</h2>
           <p>Свяжитесь с нами любым удобным способом, и мы с радостью ответим на все ваши вопросы.</p>
-          <div className="contact-buttons">
-            <a href="tel:+71234567890" className="contact-btn phone-btn">Позвонить</a>
-            <a href="mailto:info@language-school.ru" className="contact-btn email-btn">Написать</a>
+          <div className="contact-buttons"> 
+            <a href="https://t.me/muimuimchsya" className="contact-btn email-btn">Написать</a>
           </div>
         </div>
       </div>

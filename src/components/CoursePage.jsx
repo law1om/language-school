@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getCourseDetails, enrollInCourse, isAuthenticated } from '../services/api';
+import { getCourseDetails, enrollInCourse, isAuthenticated, getEnrollments } from '../services/api';
 import CourseReviews from './CourseReviews';
 import './CoursePage.css';
 
@@ -12,6 +12,7 @@ function CoursePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [enrolling, setEnrolling] = useState(false);
+  const [isEnrolled, setIsEnrolled] = useState(false);
 
   // Демонстрационные данные для UI
   const coursesData = [
@@ -391,19 +392,30 @@ function CoursePage() {
     const fetchCourseDetails = async () => {
       try {
         setLoading(true);
-        // Получаем данные курса с сервера
+        
         const courseData = await getCourseDetails(id);
         
-        // Находим демонстрационные данные для UI
+        
         const demoData = coursesData.find(c => c.id === parseInt(id)) || coursesData[0];
         
-        // Объединяем данные с сервера и демо-данные для UI
+        
         setCourse({
           ...courseData,
           image: demoData.image,
           features: demoData.features,
           program: demoData.program
         });
+
+        
+        if (isAuthenticated()) {
+          try {
+            const enrollments = await getEnrollments();
+            const enrolled = enrollments.some(e => e.courseId === parseInt(id));
+            setIsEnrolled(enrolled);
+          } catch (err) {
+            console.error('Ошибка при получении записей на курсы:', err);
+          }
+        }
       } catch (error) {
         console.error('Ошибка при загрузке курса:', error);
         setError('Не удалось загрузить данные курса. Пожалуйста, попробуйте позже.');
@@ -428,7 +440,7 @@ function CoursePage() {
   };
 
   const scrollToOrder = () => {
-    // Переход к форме заказа
+    
     const orderSection = document.getElementById('order');
     if (orderSection) {
       const headerHeight = document.querySelector('.header')?.offsetHeight || 0;
@@ -440,7 +452,7 @@ function CoursePage() {
         behavior: 'smooth'
       });
       
-      // Установка выбранного курса в форме заказа
+      
       if (course && window.setCourseInOrderForm) {
         window.setCourseInOrderForm(course.title);
       }
@@ -464,6 +476,26 @@ function CoursePage() {
     } catch (error) {
       console.error('Ошибка при записи на курс:', error);
       alert(error.message || 'Не удалось записаться на курс. Пожалуйста, попробуйте позже.');
+    } finally {
+      setEnrolling(false);
+    }
+  };
+
+  const handleStartLearning = async () => {
+    if (!isAuthenticated()) {
+      alert('Для начала обучения необходимо авторизоваться');
+      return;
+    }
+
+    try {
+      setEnrolling(true);
+      if (!isEnrolled) {
+        await enrollInCourse(id);
+      }
+      navigate(`/course/${id}/learn`);
+    } catch (error) {
+      console.error('Ошибка при начале обучения:', error);
+      alert(error.message || 'Не удалось начать обучение. Пожалуйста, попробуйте позже.');
     } finally {
       setEnrolling(false);
     }
@@ -538,8 +570,11 @@ function CoursePage() {
 
           <div className="course-enrollment">
             <h2>Хотите начать обучение?</h2>
-            <button className="enroll-button" onClick={scrollToOrder}>
-              Записаться на курс
+            <button 
+              className={`enroll-button ${isEnrolled ? 'continue' : ''}`} 
+              onClick={handleStartLearning}
+            >
+              {isEnrolled ? 'Продолжить обучение' : 'Начать обучение'}
             </button>
           </div>
           

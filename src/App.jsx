@@ -11,6 +11,7 @@ import UserProfile from './components/UserProfile';
 import { register, login, setToken, getUserFromToken, removeToken } from './services/api';
 import { Route, Routes, Link, useNavigate, BrowserRouter } from 'react-router-dom';
 import CoursePage from './components/CoursePage';
+import CourseLearning from './components/CourseLearning';
 import ReviewsPage from './pages/ReviewsPage';
 import FaqPage from './pages/FaqPage';
 
@@ -73,6 +74,23 @@ function App() {
       <div className="App">
         <Routes>
           <Route 
+            path="/course/:id/learn" 
+            element={
+              <>
+                <Header 
+                  user={user} 
+                  onAuthSuccess={handleUserLogin}
+                  onLogout={handleLogout}
+                  currentPage="course"
+                  isLearningPage={true}
+                />
+                <CourseLearning />
+                <Footer />
+                <Assistant />
+              </>
+            } 
+          />
+          <Route 
             path="/course/:id" 
             element={
               <>
@@ -84,7 +102,6 @@ function App() {
                 />
                 <CoursePage />
                 <Footer />
-                <ScrollToTopButton />
                 <Assistant />
               </>
             } 
@@ -101,7 +118,6 @@ function App() {
                 />
                 <UserProfile user={user} />
                 <Footer />
-                <ScrollToTopButton />
                 <Assistant />
               </>
             } 
@@ -118,7 +134,6 @@ function App() {
                 />
                 <ReviewsPage />
                 <Footer />
-                <ScrollToTopButton />
                 <Assistant />
               </>
             } 
@@ -135,7 +150,6 @@ function App() {
                 />
                 <FaqPage />
                 <Footer />
-                <ScrollToTopButton />
                 <Assistant />
               </>
             } 
@@ -158,10 +172,8 @@ function App() {
                 </div>
                 <DecorativeLine2 />
                 <Courses />
-                <DecorativeLine2 />
-                <Order />
                 <Footer />
-                <ScrollToTopButton />
+                
                 <Assistant />
               </>
             } 
@@ -201,7 +213,7 @@ const DecorativeLine2 = () => (
   <img src="/line2.svg" alt="Line" className="line2"/>
 );
 
-export function Header({ user, onAuthSuccess, onLogout, currentPage }) {
+export function Header({ user, onAuthSuccess, onLogout, currentPage, isLearningPage }) {
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [showUserMenu, setShowUserMenu] = useState(false);
     const navigate = useNavigate();
@@ -283,6 +295,7 @@ export function Header({ user, onAuthSuccess, onLogout, currentPage }) {
                         <span className="logo-text">KINGS COURSE</span>
                     </a>
                 </div>
+                {!isLearningPage && (
                 <nav className="menu">
                     <ul className="menu_list">
                         <li className="menu_item">
@@ -303,14 +316,9 @@ export function Header({ user, onAuthSuccess, onLogout, currentPage }) {
                                 navigate('/faq');
                             }}>FAQ</a>
                         </li>
-                        <li className="menu_item">
-                            <a href="#order" onClick={(e) => { 
-                                e.preventDefault();
-                                handleNavigation('order');
-                            }}>Записаться</a>
-                        </li>
                     </ul>
                 </nav>
+                )}
                 
                 {user ? (
                     <div className="user-profile">
@@ -1225,183 +1233,6 @@ export function FAQ() {
     );
 }
 
-export function Order() {
-    const [formData, setFormData] = useState({
-        course: '',
-        name: '',
-        phone: ''
-    });
-    
-    const [errors, setErrors] = useState({});
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    
-    useEffect(() => {
-        window.setCourseInOrderForm = (courseName) => {
-            setFormData(prev => ({ ...prev, course: courseName }));
-        };
-        
-        return () => {
-            window.setCourseInOrderForm = null;
-        };
-    }, []);
-    
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-        
-        if (errors[name]) {
-            setErrors(prev => ({ ...prev, [name]: '' }));
-        }
-    };
-    
-    const validateForm = () => {
-        let formErrors = {};
-        let isValid = true;
-        
-        if (!formData.course.trim()) {
-            formErrors.course = 'Выберите курс';
-            isValid = false;
-        }
-
-        if (!formData.name.trim()) {
-            formErrors.name = 'Введите имя';
-            isValid = false;
-        }
-        
-        if (!formData.phone.trim()) {
-            formErrors.phone = 'Введите телефон';
-            isValid = false;
-        } else if (!/^\d{10}$/.test(formData.phone.replace(/\D/g, ''))) {
-            formErrors.phone = 'Некорректный телефон';
-            isValid = false;
-        }
-        
-        setErrors(formErrors);
-        return isValid;
-    };
-    
-    const saveFormDataToJson = (data) => {
-       
-        const existingData = JSON.parse(localStorage.getItem('formSubmissions') || '[]');
-        
-       
-        const newSubmission = {
-            ...data,
-            submittedAt: new Date().toISOString(),
-            id: Date.now() 
-        };
-        
-        
-        existingData.push(newSubmission);
-        
-        
-        localStorage.setItem('formSubmissions', JSON.stringify(existingData));
-        
-        console.log('Данные сохранены в localStorage:', newSubmission);
-        return newSubmission;
-    };
-    
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        
-        if (validateForm()) {
-            setIsSubmitting(true);
-            
-            
-            const submissionData = {
-                course: formData.course,
-                name: formData.name,
-                phone: '+7' + formData.phone
-            };
-            
-            setTimeout(() => {
-                
-                const savedData = saveFormDataToJson(submissionData);
-                
-                console.log('Form submitted:', savedData);
-                alert('Заявка успешно отправлена и сохранена!');
-                setFormData({ course: '', name: '', phone: '' });
-                setIsSubmitting(false);
-            }, 1500);
-        }
-    };
-    
-    return (
-        <div className="order" id="order">
-            <div className="container">
-                <h2 className="common-title">Запишитесь на обучение</h2>
-                <div className="order-block">
-                    <div className="order-form">
-                        <div className="order-form-text">
-                            Оставьте заявку и наш менеджер свяжется с вами в ближайшее время
-                        </div>
-                        <form className="order-form-inputs" onSubmit={handleSubmit}>
-                            <div className="input-group">
-                                <select
-                                    name="course"
-                                    value={formData.course}
-                                    onChange={handleChange}
-                                    className={errors.course ? 'error' : ''}
-                                >
-                                    <option value="">Выберите курс</option>
-                                    <option value="Английский язык">Английский язык</option>
-                                    <option value="Немецкий язык">Немецкий язык</option>
-                                    <option value="Французский язык">Французский язык</option>
-                                    <option value="Испанский язык">Испанский язык</option>
-                                    <option value="Итальянский язык">Итальянский язык</option>
-                                    <option value="Японский язык">Японский язык</option>
-                                    <option value="Китайский язык">Китайский язык</option>
-                                    <option value="Корейский язык">Корейский язык</option>
-                                    <option value="Арабский язык">Арабский язык</option>
-                                    <option value="Португальский язык">Португальский язык</option>
-                                </select>
-                                {errors.course && <div className="error-message">{errors.course}</div>}
-                            </div>
-                            <div className="input-group">
-                                <input
-                                    type="text"
-                                    name="name"
-                                    placeholder="Ваше имя"
-                                    value={formData.name}
-                                    onChange={handleChange}
-                                    className={errors.name ? 'error' : ''}
-                                    autoComplete="off"
-                                />
-                                {errors.name && <div className="error-message">{errors.name}</div>}
-                            </div>
-                            <div className="input-group phone-input-group">
-                                <div className="phone-input-container">
-                                    <span className="phone-prefix">+7</span>
-                                    <input
-                                        type="tel"
-                                        name="phone"
-                                        placeholder="(777) 123-45-67"
-                                        value={formData.phone}
-                                        onChange={handleChange}
-                                        className={errors.phone ? 'error' : ''}
-                                        autoComplete="off"
-                                    />
-                                </div>
-                                {errors.phone && <div className="error-message">{errors.phone}</div>}
-                            </div>
-                            <button 
-                                type="submit" 
-                                className="button violet-button"
-                                disabled={isSubmitting}
-                            >
-                                {isSubmitting ? 'Отправка...' : 'Записаться на обучение'}
-                            </button>
-                        </form>
-                    </div>
-                    <div className="order-image">
-                        <img src="/books.svg" alt="Книги" />
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
 export function Footer() {
     return (
         <div className="footer">
@@ -1412,45 +1243,6 @@ export function Footer() {
                 <div className="rights">© 2025 Все права защищены</div>
             </div>
         </div>
-    );
-}
-
-export function ScrollToTopButton() {
-    const [isVisible, setIsVisible] = useState(false);
-    
-    useEffect(() => {
-        const toggleVisibility = () => {
-            if (window.pageYOffset > 300) {
-                setIsVisible(true);
-            } else {
-                setIsVisible(false);
-            }
-        };
-        
-        window.addEventListener('scroll', toggleVisibility);
-        
-        return () => window.removeEventListener('scroll', toggleVisibility);
-    }, []);
-    
-    const scrollToTop = () => {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-    };
-    
-    return (
-        <>
-            {isVisible && (
-                <button 
-                    className="scroll-top" 
-                    onClick={scrollToTop}
-                    aria-label="Прокрутить наверх"
-                >
-                    ↑
-                </button>
-            )}
-        </>
     );
 }
 
