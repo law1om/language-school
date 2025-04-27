@@ -37,10 +37,20 @@ function App() {
               const data = await response.json();
               setUser(data.user);
             } else {
-              removeToken();
+              // Если сервер вернул ошибку, но токен есть - 
+              // используем данные из токена как запасной вариант
+              if (userData) {
+                setUser(userData);
+              } else {
+                removeToken();
+              }
             }
           } catch (error) {
             console.error('Ошибка при проверке авторизации:', error);
+            // В случае ошибки сети используем данные из токена
+            if (userData) {
+              setUser(userData);
+            }
           }
         }
       } finally {

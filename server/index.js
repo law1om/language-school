@@ -579,4 +579,131 @@ app.delete('/api/reviews/:reviewId', authenticateToken, async (req, res) => {
     console.error('Ошибка при удалении отзыва:', error);
     res.status(500).json({ message: 'Ошибка сервера при удалении отзыва' });
   }
+});
+
+// Маршруты для административной панели
+// Получение всех пользователей (только для администраторов)
+app.get('/api/admin/users', authenticateToken, async (req, res) => {
+  try {
+    // Проверяем, является ли пользователь администратором
+    if (req.user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Доступ запрещен. Требуются права администратора.' });
+    }
+    
+    // Получаем всех пользователей
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true
+      }
+    });
+    
+    res.status(200).json(users);
+  } catch (error) {
+    console.error('Ошибка при получении списка пользователей:', error);
+    res.status(500).json({ message: 'Ошибка сервера при получении списка пользователей' });
+  }
+});
+
+// Получение данных пользователя по ID (только для администраторов)
+app.get('/api/admin/users/:userId', authenticateToken, async (req, res) => {
+  try {
+    // Проверяем, является ли пользователь администратором
+    if (req.user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Доступ запрещен. Требуются права администратора.' });
+    }
+    
+    const { userId } = req.params;
+    
+    // Получаем данные пользователя
+    const user = await prisma.user.findUnique({
+      where: { id: parseInt(userId) },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true
+      }
+    });
+    
+    if (!user) {
+      return res.status(404).json({ message: 'Пользователь не найден' });
+    }
+    
+    res.status(200).json(user);
+  } catch (error) {
+    console.error('Ошибка при получении данных пользователя:', error);
+    res.status(500).json({ message: 'Ошибка сервера при получении данных пользователя' });
+  }
+});
+
+// Получение записей на курсы пользователя (только для администраторов)
+app.get('/api/admin/users/:userId/enrollments', authenticateToken, async (req, res) => {
+  try {
+    // Проверяем, является ли пользователь администратором
+    if (req.user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Доступ запрещен. Требуются права администратора.' });
+    }
+    
+    const { userId } = req.params;
+    
+    // Получаем записи на курсы для указанного пользователя
+    const enrollments = await prisma.enrollment.findMany({
+      where: { userId: parseInt(userId) },
+      include: { course: true }
+    });
+    
+    res.status(200).json(enrollments);
+  } catch (error) {
+    console.error('Ошибка при получении записей пользователя:', error);
+    res.status(500).json({ message: 'Ошибка сервера при получении записей пользователя' });
+  }
+});
+
+// Удаление пользователя (только для администраторов)
+app.delete('/api/admin/users/:userId', authenticateToken, async (req, res) => {
+  try {
+    // Проверяем, является ли пользователь администратором
+    if (req.user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Доступ запрещен. Требуются права администратора.' });
+    }
+    
+    const { userId } = req.params;
+    const userIdInt = parseInt(userId);
+    
+    // Проверяем, не пытается ли админ удалить себя
+    if (req.user.userId === userIdInt) {
+      return res.status(400).json({ message: 'Вы не можете удалить свою учетную запись.' });
+    }
+    
+    // Проверяем, существует ли пользователь
+    const user = await prisma.user.findUnique({
+      where: { id: userIdInt }
+    });
+    
+    if (!user) {
+      return res.status(404).json({ message: 'Пользователь не найден' });
+    }
+    
+    // Проверяем, не пытается ли админ удалить другого админа
+    if (user.role === 'ADMIN') {
+      return res.status(400).json({ message: 'Невозможно удалить администратора' });
+    }
+    
+    // Сначала удаляем связанные данные (записи на курсы и отзывы)
+    await prisma.$transaction([
+      prisma.review.deleteMany({ where: { userId: userIdInt } }),
+      prisma.enrollment.deleteMany({ where: { userId: userIdInt } }),
+      prisma.user.delete({ where: { id: userIdInt } })
+    ]);
+    
+    res.status(200).json({ message: 'Пользователь успешно удален' });
+  } catch (error) {
+    console.error('Ошибка при удалении пользователя:', error);
+    res.status(500).json({ message: 'Ошибка сервера при удалении пользователя' });
+  }
 }); 

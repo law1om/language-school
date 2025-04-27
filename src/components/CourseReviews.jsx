@@ -12,6 +12,12 @@ function CourseReviews({ courseId }) {
     setRefreshReviews(prev => prev + 1);
   };
 
+  // Обработчик для удаления отзыва
+  const handleReviewDeleted = () => {
+    // Увеличиваем счетчик, чтобы обновить список отзывов
+    setRefreshReviews(prev => prev + 1);
+  };
+
   return (
     <div className="course-reviews-section">
       <h2 className="section-title">Отзывы о курсе</h2>
@@ -29,7 +35,8 @@ function CourseReviews({ courseId }) {
       
       <ReviewsList 
         courseId={courseId} 
-        key={refreshReviews} // Ключ для обновления при добавлении отзыва
+        refresh={refreshReviews} // Передаем счетчик обновления как проп
+        onReviewDeleted={handleReviewDeleted} // Передаем обработчик удаления
       />
     </div>
   );

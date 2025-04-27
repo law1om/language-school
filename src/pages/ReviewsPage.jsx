@@ -8,6 +8,7 @@ function ReviewsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [refreshReviews, setRefreshReviews] = useState(0);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -32,6 +33,11 @@ function ReviewsPage() {
 
   const handleCourseChange = (e) => {
     setSelectedCourse(parseInt(e.target.value));
+  };
+
+  const handleReviewDeleted = () => {
+    // Увеличиваем счетчик для обновления списка отзывов
+    setRefreshReviews(prev => prev + 1);
   };
 
   return (
@@ -69,7 +75,11 @@ function ReviewsPage() {
 
             {selectedCourse && (
               <div className="selected-course-reviews">
-                <ReviewsList courseId={selectedCourse} />
+                <ReviewsList 
+                  courseId={selectedCourse} 
+                  refresh={refreshReviews}
+                  onReviewDeleted={handleReviewDeleted}
+                />
               </div>
             )}
           </div>

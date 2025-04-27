@@ -153,7 +153,7 @@ function CourseLearning() {
   return (
     <div className="course-learning-page">
       <div className="course-learning-header">
-        <button className="back-button" onClick={goBack}>← Назад</button>
+      
         <h1>{course.title} - Обучение</h1>
       </div>
 

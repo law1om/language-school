@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getCourseReviews, deleteReview, isAuthenticated, getUserFromToken } from '../services/api';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
@@ -8,11 +8,12 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import './ReviewsList.css';
 
-const ReviewsList = ({ courseId, refresh }) => {
+const ReviewsList = ({ courseId, refresh, onReviewDeleted }) => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const currentUser = getUserFromToken();
+  const swiperRef = useRef(null);
   
   useEffect(() => {
     const fetchReviews = async () => {
@@ -56,8 +57,36 @@ const ReviewsList = ({ courseId, refresh }) => {
     
     try {
       await deleteReview(reviewId);
+      
       // Удаляем отзыв из локального состояния
-      setReviews(reviews.filter(review => review.id !== reviewId));
+      const updatedReviews = reviews.filter(review => review.id !== reviewId);
+      setReviews(updatedReviews);
+      
+      // Если после удаления больше нет отзывов, обновляем родительский компонент
+      if (updatedReviews.length === 0) {
+        if (onReviewDeleted) {
+          onReviewDeleted();
+        }
+        return;
+      }
+      
+      // Обновляем Swiper после удаления отзыва
+      if (swiperRef.current && swiperRef.current.swiper) {
+        const swiper = swiperRef.current.swiper;
+        // Перерисовываем слайдер
+        setTimeout(() => {
+          swiper.update();
+          // Проверяем, нужно ли перейти на предыдущий слайд
+          if (swiper.activeIndex >= updatedReviews.length) {
+            swiper.slideTo(updatedReviews.length - 1);
+          }
+        }, 0);
+      }
+      
+      // Вызываем обратный вызов для уведомления родителя
+      if (onReviewDeleted) {
+        onReviewDeleted();
+      }
     } catch (error) {
       console.error('Ошибка при удалении отзыва:', error);
       alert('Не удалось удалить отзыв: ' + error.message);
@@ -121,22 +150,24 @@ const ReviewsList = ({ courseId, refresh }) => {
 
       <div className="reviews-container">
         <Swiper
+          ref={swiperRef}
           modules={[Navigation, Pagination]}
           slidesPerView={1}
           navigation={true}
-          loop={true}
+          loop={reviews.length > 1}
           pagination={false}
+          key={`swiper-${reviews.length}`}
           breakpoints={{
             640: {
               slidesPerView: 1,
               spaceBetween: 20,
             },
             768: {
-              slidesPerView: 2,
+              slidesPerView: Math.min(2, reviews.length),
               spaceBetween: 25,
             },
             1024: {
-              slidesPerView: 3,
+              slidesPerView: Math.min(3, reviews.length),
               spaceBetween: 30,
             },
           }}

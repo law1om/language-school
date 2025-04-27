@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getCourseDetails, enrollInCourse, isAuthenticated, getEnrollments } from '../services/api';
+import { getCourseDetails, enrollInCourse, isAuthenticated, getEnrollments, isAdmin, deleteCourse } from '../services/api';
 import CourseReviews from './CourseReviews';
 import './CoursePage.css';
 
@@ -13,6 +13,9 @@ function CoursePage() {
   const [error, setError] = useState('');
   const [enrolling, setEnrolling] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
+  const [isAdminUser, setIsAdminUser] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Демонстрационные данные для UI
   const coursesData = [
@@ -92,7 +95,7 @@ function CoursePage() {
     },
     {
       id: 3,
-      image: "/courses-bg/fr-bg.avif",
+      image: "/courses-bg/fr-bg.jpg",
       title: "Французский язык",
       description: "Говори, как парижанин!",
       features: [
@@ -406,6 +409,8 @@ function CoursePage() {
           program: demoData.program
         });
 
+        // Проверяем, является ли пользователь администратором
+        setIsAdminUser(isAdmin());
         
         if (isAuthenticated()) {
           try {
@@ -501,6 +506,34 @@ function CoursePage() {
     }
   };
 
+  const handleEditCourse = () => {
+    navigate(`/admin/courses/${id}/edit`);
+  };
+
+  const handleDeleteCourse = async () => {
+    if (!showDeleteConfirm) {
+      setShowDeleteConfirm(true);
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      await deleteCourse(id);
+      alert('Курс успешно удален');
+      navigate('/');
+    } catch (error) {
+      console.error('Ошибка при удалении курса:', error);
+      alert(error.message || 'Не удалось удалить курс. Пожалуйста, попробуйте позже.');
+      setShowDeleteConfirm(false);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
+  };
+
   if (loading) {
     return (
       <div className="course-page-loading">
@@ -524,14 +557,44 @@ function CoursePage() {
     <div className="course-page">
       <div className="course-page-header" style={{ backgroundImage: `url(${course.image})` }}>
         <button className="back-button" onClick={goBack}>← Назад</button>
-        <h1>{course.title}</h1>
+        <div className="header-content">
+          <h1>{course.title}</h1>
+          <p className="header-description">{course.description}</p>
+        </div>
       </div>
       <div className="course-page-container">
+        {isAdminUser && (
+          <div className="admin-course-controls">
+            <button className="edit-course-btn" onClick={handleEditCourse}>
+              Редактировать курс
+            </button>
+            {showDeleteConfirm ? (
+              <div className="delete-confirm">
+                <p>Вы уверены, что хотите удалить этот курс?</p>
+                <div className="delete-buttons">
+                  <button 
+                    className="confirm-delete-btn" 
+                    onClick={handleDeleteCourse}
+                    disabled={deleting}
+                  >
+                    {deleting ? 'Удаление...' : 'Да, удалить'}
+                  </button>
+                  <button className="cancel-delete-btn" onClick={cancelDelete}>
+                    Отмена
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button className="delete-course-btn" onClick={handleDeleteCourse}>
+                Удалить курс
+              </button>
+            )}
+          </div>
+        )}
+        
         <div className="course-page-content">
           <div className="course-description-section">
             <h2>Описание курса</h2>
-            <p className="course-description">{course.description}</p>
-            
             <div className="course-features">
               <h3>Особенности:</h3>
               <ul>

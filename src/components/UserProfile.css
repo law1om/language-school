@@ -632,4 +632,327 @@
     width: 80px;
     height: 60px;
   }
+}
+
+/* Добавляем стили для административной панели */
+.admin-panel {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+.admin-content {
+  padding: 20px;
+}
+
+.admin-loading {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.admin-users h3{
+  color: black;
+}
+
+/* Стили для списка пользователей */
+.users-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.user-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: white;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.user-avatar {
+  width: 50px;
+  height: 50px;
+  background-color: #5243f4;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.user-details h4 {
+  margin: 0 0 5px;
+  font-size: 16px;
+  color: #333;
+}
+
+.user-email {
+  margin: 0 0 5px;
+  font-size: 14px;
+  color: #000000;
+}
+
+.user-role {
+  margin: 0;
+  font-size: 12px;
+  background-color: #f0f0f0;
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  color: #ffffff;
+}
+
+.view-enrollments-btn {
+  background-color: #5243f4;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.view-enrollments-btn:hover {
+  background-color: #4536e3;
+}
+
+/* Стили для просмотра записей пользователя */
+.user-enrollments-view {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Стили для кнопок действий пользователя */
+.user-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Стили для кнопки удаления пользователя */
+.delete-user-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.delete-user-btn:hover {
+  background-color: #c82333;
+}
+
+/* Диалог подтверждения удаления */
+.delete-confirmation {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 8px;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.confirm-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.delete-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: #c82333;
+}
+
+.delete-btn:disabled {
+  background-color: #e9717a;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background-color: #6c757d;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background-color: #5a6268;
+}
+
+.back-to-users {
+  background: none;
+  border: none;
+  color: #5243f4;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.admin-enrollments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.admin-enrollment-item {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 15px;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .user-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .view-enrollments-btn {
+    width: 100%;
+  }
+}
+
+/* Стили для всплывающего меню пользователя (восстановлены) */
+.user-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: linear-gradient(145deg, #323057 0%, #1e1c2f 100%);
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    width: 200px;
+    z-index: 1000;
+    animation: menuSlide 0.3s ease-in-out;
+    overflow: hidden;
+}
+
+@keyframes menuSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.user-info {
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-menu-item {
+    padding: 10px 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-menu-item:last-child {
+    border-bottom: none;
+}
+
+.user-role {
+    display: inline-block;
+    background-color: #5243F4;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+}
+
+.user-menu-button {
+    background: transparent;
+    border: none;
+    color: white;
+    width: 100%;
+    text-align: left;
+    padding: 5px 0;
+    cursor: pointer;
+    font-size: 14px;
+    transition: color 0.2s;
+}
+
+.user-menu-button:hover {
+    color: #5243F4;
+}
+
+/* Новые стили для кнопки личного кабинета */
+.user-menu-item:nth-child(2) .user-menu-button {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.user-menu-item:nth-child(2) .user-menu-button::before {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Cpath d='M9 3v18'/%3E%3Cpath d='M13 7l2 2-2 2'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    transition: background-image 0.2s;
+}
+
+.user-menu-item:nth-child(2) .user-menu-button:hover::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235243F4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Cpath d='M9 3v18'/%3E%3Cpath d='M13 7l2 2-2 2'/%3E%3C/svg%3E");
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.user-email {
+    font-size: 14px;
+    color: rgb(255, 255, 255);
+    word-break: break-all;
+}
+
+.user-icon {
+  cursor: pointer;
+  margin-left: 8px;
+  padding: 3px;
+  border-radius: 50%;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.user-icon:hover {
+  background-color: rgba(82, 67, 244, 0.2);
+  color: #5243F4;
 } 

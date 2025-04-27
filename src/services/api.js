@@ -1,5 +1,34 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
+// Включение режима отладки (можно изменить для отладки)
+const DEBUG = true;
+
+// Функция логирования для отладки API запросов
+function logApiRequest(endpoint, method, data = null) {
+  if (DEBUG) {
+    console.log(`🔹 API Request: ${method} ${endpoint}`);
+    if (data) {
+      console.log('Request data:', data);
+    }
+  }
+}
+
+function logApiResponse(endpoint, status, data = null) {
+  if (DEBUG) {
+    console.log(`🔸 API Response: ${status} ${endpoint}`);
+    if (data) {
+      console.log('Response data:', data);
+    }
+  }
+}
+
+function logApiError(endpoint, error) {
+  if (DEBUG) {
+    console.error(`❌ API Error: ${endpoint}`);
+    console.error(error);
+  }
+}
+
 // Кэш для хранения результатов запросов
 const cache = new Map();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 минут
@@ -55,6 +84,9 @@ async function fetchWithRetry(endpoint, options = {}, retries = 3) {
     headers,
   };
 
+  // Логирование запроса
+  logApiRequest(endpoint, options.method || 'GET', options.body);
+
   let lastError;
   
   for (let i = 0; i < retries; i++) {
@@ -69,6 +101,9 @@ async function fetchWithRetry(endpoint, options = {}, retries = 3) {
         data = await response.text();
       }
 
+      // Логирование ответа
+      logApiResponse(endpoint, response.status, data);
+
       if (!response.ok) {
         throw new APIError(
           data.message || `Ошибка сервера: ${response.status}`,
@@ -80,6 +115,9 @@ async function fetchWithRetry(endpoint, options = {}, retries = 3) {
       return data;
     } catch (error) {
       lastError = error;
+      
+      // Логирование ошибки
+      logApiError(endpoint, error);
       
       // Не повторяем запрос при определенных ошибках
       if (error.status === 401 || error.status === 403 || error.status === 404) {
@@ -195,7 +233,12 @@ export function getUserFromToken() {
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const payload = JSON.parse(window.atob(base64));
     
-    return payload.user;
+    // Возвращаем данные пользователя непосредственно из payload
+    return {
+      id: payload.userId,
+      email: payload.email,
+      role: payload.role
+    };
   } catch (error) {
     console.error('Ошибка при расшифровке токена:', error);
     return null;
@@ -211,4 +254,77 @@ export async function updateUserCourseProgress(courseId, data) {
     method: 'POST',
     body: JSON.stringify(data),
   });
+}
+
+// Админские функции
+export async function getAllUsers() {
+  console.log('🔍 Вызов функции getAllUsers');
+  try {
+    // Проверяем авторизацию
+    const userToken = getToken();
+    if (!userToken) {
+      console.error('❌ Ошибка авторизации: отсутствует токен');
+      throw new APIError('Требуется авторизация', 401);
+    }
+    
+    // Проверяем роль пользователя
+    const currentUser = getUserFromToken();
+    if (!currentUser || currentUser.role !== 'ADMIN') {
+      console.error('❌ Ошибка доступа: пользователь не администратор');
+      throw new APIError('Недостаточно прав', 403);
+    }
+    
+    const data = await fetchWithRetry('/admin/users', {
+      method: 'GET',
+    });
+    
+    console.log('✅ Успешно получены данные пользователей:', data);
+    return data;
+  } catch (error) {
+    console.error('❌ Ошибка при получении списка пользователей:', error);
+    throw error;
+  }
+}
+
+export async function getUserById(userId) {
+  return fetchWithRetry(`/admin/users/${userId}`, {
+    method: 'GET',
+  });
+}
+
+export async function getUserEnrollments(userId) {
+  return fetchWithRetry(`/admin/users/${userId}/enrollments`, {
+    method: 'GET',
+  });
+}
+
+export async function createCourse(courseData) {
+  return fetchWithRetry('/admin/courses', {
+    method: 'POST',
+    body: JSON.stringify(courseData),
+  });
+}
+
+export async function updateCourse(courseId, courseData) {
+  return fetchWithRetry(`/admin/courses/${courseId}`, {
+    method: 'PUT',
+    body: JSON.stringify(courseData),
+  });
+}
+
+export async function deleteCourse(courseId) {
+  return fetchWithRetry(`/admin/courses/${courseId}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function deleteUser(userId) {
+  return fetchWithRetry(`/admin/users/${userId}`, {
+    method: 'DELETE',
+  });
+}
+
+export function isAdmin() {
+  const user = getUserFromToken();
+  return user && user.role === 'ADMIN';
 } 
