@@ -22,11 +22,11 @@ app.use(cors({
 }));
 
 // Ограничение количества запросов
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 минут
-  max: 100 // Максимум 100 запросов с одного IP
-});
-app.use('/api/', limiter);
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 минут
+//   max: 100 // Максимум 100 запросов с одного IP
+// });
+// app.use('/api/', limiter);
 
 // Глобальная обработка ошибок
 const errorHandler = (err, req, res, next) => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getCourseDetails, enrollInCourse, isAuthenticated, getEnrollments, isAdmin, deleteCourse } from '../services/api';
+import { getCourseDetails, enrollInCourse, isAuthenticated, getEnrollments, isAdmin } from '../services/api';
 import CourseReviews from './CourseReviews';
 import './CoursePage.css';
 
@@ -14,14 +14,12 @@ function CoursePage() {
   const [enrolling, setEnrolling] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [isAdminUser, setIsAdminUser] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
   // Демонстрационные данные для UI
   const coursesData = [
     {
       id: 1,
-      image: "/courses-bg/eng-bg.avif",
+      image: "/courses-bg/eng-bg.jpg",
       title: "Английский язык",
       description: "Погрузись в мир английского!",
       features: [
@@ -36,15 +34,8 @@ function CoursePage() {
             "Базовая грамматика и лексика",
             "Повседневные фразы и выражения",
             "Основы произношения"
-          ]
-        },
-        {
-          title: "Средний уровень",
-          content: [
-            "Углубленная грамматика (времена, пассивный залог)",
-            "Разговорные клубы и дискуссии",
-            "Аудирование и понимание речи носителей"
-          ]
+          ],
+          video: "https://www.youtube.com/embed/MuZWpuB1Iqo"
         },
         {
           title: "Продвинутый уровень",
@@ -52,13 +43,14 @@ function CoursePage() {
             "Сложные грамматические конструкции",
             "Деловой английский и переговоры",
             "Подготовка к международным экзаменам"
-          ]
+          ],
+          video: "https://www.youtube.com/embed/LZNcVz7cV2A"
         }
       ]
     },
     {
       id: 2,
-      image: "/courses-bg/ger-bg.avif",
+      image: "/courses-bg/ger-bg.jpg",
       title: "Немецкий язык",
       description: "Открой для себя язык Гёте!",
       features: [
@@ -73,7 +65,8 @@ function CoursePage() {
             "Немецкий алфавит и произношение",
             "Основные фразы и выражения",
             "Простые грамматические конструкции"
-          ]
+          ],
+          video: "https://www.youtube.com/embed/r9os9Q6t6Xc"
         },
         {
           title: "Продвинутый курс",
@@ -81,21 +74,14 @@ function CoursePage() {
             "Сложная грамматика (времена, склонения)",
             "Разговорная практика и диалоги",
             "Чтение и анализ немецких текстов"
-          ]
-        },
-        {
-          title: "Специализированный курс",
-          content: [
-            "Деловой немецкий",
-            "Медицинский немецкий",
-            "Подготовка к экзаменам"
-          ]
+          ],
+          video: "https://www.youtube.com/embed/YFP7q_Rw3p8"
         }
       ]
     },
     {
       id: 3,
-      image: "/courses-bg/fr-bg.jpg",
+      image: "/courses-bg/france-bg.jpg",
       title: "Французский язык",
       description: "Говори, как парижанин!",
       features: [
@@ -110,15 +96,8 @@ function CoursePage() {
             "Фонетика и произношение",
             "Базовый словарный запас",
             "Простые грамматические структуры"
-          ]
-        },
-        {
-          title: "Основной курс",
-          content: [
-            "Времена и наклонения",
-            "Повседневные диалоги и ситуации",
-            "Французская культура и традиции"
-          ]
+          ],
+          video: "https://www.youtube.com/embed/4K-sYdJimrc"
         },
         {
           title: "Профессиональный курс",
@@ -126,13 +105,14 @@ function CoursePage() {
             "Бизнес-французский",
             "Подготовка к экзаменам DELF/DALF",
             "Перевод и интерпретация"
-          ]
+          ],
+          video: "https://www.youtube.com/embed/mZ16sVJ-nAA"
         }
       ]
     },
     {
       id: 4,
-      image: "/courses-bg/esp-bg.avif",
+      image: "/courses-bg/spain-bg.jpg",
       title: "Испанский язык",
       description: "Почувствуй страсть Испании!",
       features: [
@@ -147,29 +127,23 @@ function CoursePage() {
             "Основы испанской грамматики",
             "Базовые разговорные фразы",
             "Испанское произношение"
-          ]
+          ],
+          video: "https://www.youtube.com/embed/X_FL6Ta_3WM"
         },
         {
-          title: "Уровень B1-B2",
+          title: "Уровень B1-C2",
           content: [
             "Углубленная грамматика",
             "Разговорная практика",
-            "Различия между испанским Испании и Латинской Америки"
-          ]
-        },
-        {
-          title: "Уровень C1-C2",
-          content: [
-            "Изучение сложных конструкций",
-            "Деловой испанский",
-            "Подготовка к экзамену DELE"
-          ]
+            "Деловой испанский и подготовка к DELE"
+          ],
+          video: "https://www.youtube.com/embed/CupnpvL7j5A"
         }
       ]
     },
     {
       id: 5,
-      image: "/courses-bg/italy-bg.avif",
+      image: "/courses-bg/italy-bg.jpg",
       title: "Итальянский язык",
       description: "Говори, как в Италии!",
       features: [
@@ -184,15 +158,8 @@ function CoursePage() {
             "Базовая грамматика и лексика",
             "Итальянское произношение",
             "Простые диалоги"
-          ]
-        },
-        {
-          title: "Средний уровень",
-          content: [
-            "Времена и наклонения",
-            "Разговорная практика",
-            "Итальянская культура и традиции"
-          ]
+          ],
+          video: "https://www.youtube.com/embed/Jw-X9VyZfOE"
         },
         {
           title: "Продвинутый уровень",
@@ -200,7 +167,8 @@ function CoursePage() {
             "Сложные грамматические конструкции",
             "Итальянская литература и кино",
             "Деловой итальянский"
-          ]
+          ],
+          video: "https://www.youtube.com/embed/AY2sYlLrGFk"
         }
       ]
     },
@@ -506,34 +474,6 @@ function CoursePage() {
     }
   };
 
-  const handleEditCourse = () => {
-    navigate(`/admin/courses/${id}/edit`);
-  };
-
-  const handleDeleteCourse = async () => {
-    if (!showDeleteConfirm) {
-      setShowDeleteConfirm(true);
-      return;
-    }
-
-    try {
-      setDeleting(true);
-      await deleteCourse(id);
-      alert('Курс успешно удален');
-      navigate('/');
-    } catch (error) {
-      console.error('Ошибка при удалении курса:', error);
-      alert(error.message || 'Не удалось удалить курс. Пожалуйста, попробуйте позже.');
-      setShowDeleteConfirm(false);
-    } finally {
-      setDeleting(false);
-    }
-  };
-
-  const cancelDelete = () => {
-    setShowDeleteConfirm(false);
-  };
-
   if (loading) {
     return (
       <div className="course-page-loading">
@@ -563,6 +503,7 @@ function CoursePage() {
         </div>
       </div>
       <div className="course-page-container">
+        {/* Удаляем блок с кнопками администратора
         {isAdminUser && (
           <div className="admin-course-controls">
             <button className="edit-course-btn" onClick={handleEditCourse}>
@@ -591,6 +532,7 @@ function CoursePage() {
             )}
           </div>
         )}
+        */}
         
         <div className="course-page-content">
           <div className="course-description-section">
@@ -625,6 +567,22 @@ function CoursePage() {
                         <li key={itemIndex}>{item}</li>
                       ))}
                     </ul>
+                    {section.video && expandedSections.includes(index) && (
+                      <div className="program-video">
+                        <h4>Демонстрационное видео:</h4>
+                        <div className="video-container">
+                          <iframe 
+                            width="100%" 
+                            height="315" 
+                            src={section.video} 
+                            title={`Видео для ${section.title}`}
+                            frameBorder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowFullScreen>
+                          </iframe>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

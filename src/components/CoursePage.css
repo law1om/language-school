@@ -204,6 +204,30 @@
   color: #555;
 }
 
+.program-video {
+  padding: 0 20px 20px;
+}
+
+.program-video h4 {
+  margin-top: 10px;
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 10px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.video-container iframe {
+  border-radius: 6px;
+}
+
 .course-enrollment {
   background-color: #f7f1ff;
   padding: 30px;

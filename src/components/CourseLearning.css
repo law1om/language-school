@@ -155,6 +155,32 @@
   min-height: 300px;
 }
 
+.lesson-video {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px dashed #eee;
+}
+
+.lesson-video h3 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.video-container iframe {
+  border-radius: 6px;
+  background-color: #f1f1f1;
+}
+
 .lesson-navigation {
   display: flex;
   justify-content: space-between;

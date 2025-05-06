@@ -3,6 +3,190 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getCourseDetails, getCourseLearningMaterials, updateUserCourseProgress, isAuthenticated } from '../services/api';
 import './CourseLearning.css';
 
+
+const coursesData = [
+  {
+    id: 1,
+    title: "Английский язык",
+    modules: [
+      {
+        title: "Модуль 1: Основы английского",
+        lessons: [
+          {
+            title: "Урок 1: Алфавит и произношение",
+            content: "Здесь будет контент урока...",
+            video: "https://www.youtube.com/embed/MuZWpuB1Iqo"
+          },
+          {
+            title: "Урок 2: Приветствия и знакомство",
+            content: "Здесь будет контент урока...",
+            video: "https://www.youtube.com/embed/8P7i3LaCcgI"
+          }
+        ]
+      },
+      {
+        title: "Модуль 2: Грамматика английского",
+        lessons: [
+          {
+            title: "Урок 1: Времена и глаголы",
+            content: "Здесь будет контент урока...",
+            video: "https://www.youtube.com/embed/lh1PDbpqzz4"
+          },
+          {
+            title: "Урок 2: Построение предложений",
+            content: "Здесь будет контент урока...",
+            video: "https://www.youtube.com/embed/RdhzrflYX6Y"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 2,
+    title: "Немецкий язык",
+    modules: [
+      {
+        title: "Модуль 1: Основы немецкого",
+        lessons: [
+          {
+            title: "Урок 1: Немецкий алфавит и произношение",
+            content: "Здесь будет контент урока...",
+            video: "https://www.youtube.com/embed/SH5X0s7a_Yg"
+          },
+          {
+            title: "Урок 2: Приветствия и знакомство",
+            content: "Здесь будет контент урока...",
+            video: "https://www.youtube.com/embed/r9os9Q6t6Xc"
+          }
+        ]
+      },
+      {
+        title: "Модуль 2: Грамматика немецкого",
+        lessons: [
+          {
+            title: "Урок 1: Артикли и падежи",
+            content: "Здесь будет контент урока...",
+            video: "https://www.youtube.com/embed/YFP7q_Rw3p8"
+          },
+          {
+            title: "Урок 2: Построение предложений",
+            content: "Здесь будет контент урока...",
+            video: "https://www.youtube.com/embed/KzV_CG-Gp-Q"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 3,
+    title: "Французский язык",
+    modules: [
+      {
+        title: "Модуль 1: Основы французского",
+        lessons: [
+          {
+            title: "Урок 1: Французское произношение",
+            content: "Здесь будет контент урока...",
+            video: "https://www.youtube.com/embed/4K-sYdJimrc"
+          },
+          {
+            title: "Урок 2: Приветствия и знакомство",
+            content: "Здесь будет контент урока...",
+            video: "https://www.youtube.com/embed/hd0_GZHHWeE"
+          }
+        ]
+      },
+      {
+        title: "Модуль 2: Грамматика французского",
+        lessons: [
+          {
+            title: "Урок 1: Артикли и роды",
+            content: "Здесь будет контент урока...",
+            video: "https://www.youtube.com/embed/mZ16sVJ-nAA"
+          },
+          {
+            title: "Урок 2: Построение предложений",
+            content: "Здесь будет контент урока...",
+            video: "https://www.youtube.com/embed/WxTE3-bnMfg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 4,
+    title: "Испанский язык",
+    modules: [
+      {
+        title: "Модуль 1: Основы испанского",
+        lessons: [
+          {
+            title: "Урок 1: Испанский алфавит и произношение",
+            content: "Здесь будет контент урока...",
+            video: "https://www.youtube.com/embed/X_FL6Ta_3WM"
+          },
+          {
+            title: "Урок 2: Приветствия и знакомство",
+            content: "Здесь будет контент урока...",
+            video: "https://www.youtube.com/embed/jzNC_ZdE7N0"
+          }
+        ]
+      },
+      {
+        title: "Модуль 2: Грамматика испанского",
+        lessons: [
+          {
+            title: "Урок 1: Глаголы и спряжения",
+            content: "Здесь будет контент урока...",
+            video: "https://www.youtube.com/embed/CupnpvL7j5A"
+          },
+          {
+            title: "Урок 2: Построение предложений",
+            content: "Здесь будет контент урока...",
+            video: "https://www.youtube.com/embed/ER8PKb7JT3A"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 5,
+    title: "Итальянский язык",
+    modules: [
+      {
+        title: "Модуль 1: Основы итальянского",
+        lessons: [
+          {
+            title: "Урок 1: Итальянский алфавит и произношение",
+            content: "Здесь будет контент урока...",
+            video: "https://www.youtube.com/embed/Jw-X9VyZfOE"
+          },
+          {
+            title: "Урок 2: Приветствия и знакомство",
+            content: "Здесь будет контент урока...",
+            video: "https://www.youtube.com/embed/Y3UB9EsJSsw"
+          }
+        ]
+      },
+      {
+        title: "Модуль 2: Грамматика итальянского",
+        lessons: [
+          {
+            title: "Урок 1: Артикли и существительные",
+            content: "Здесь будет контент урока...",
+            video: "https://www.youtube.com/embed/AY2sYlLrGFk"
+          },
+          {
+            title: "Урок 2: Построение предложений",
+            content: "Здесь будет контент урока...",
+            video: "https://www.youtube.com/embed/f0zrZz7arFw"
+          }
+        ]
+      }
+    ]
+  }
+];
+
 function CourseLearning() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -38,35 +222,14 @@ function CourseLearning() {
           });
         } catch (err) {
           console.error('Ошибка при загрузке учебных материалов:', err);
-          // Если не удалось получить материалы с сервера, используем демо-данные
+          
+          // Находим данные курса из coursesData по id
+          const courseDataFromArray = coursesData.find(c => c.id === parseInt(id)) || coursesData[0];
+          
+          // Используем модули напрямую из массива данных
           setCourse({
             ...courseData,
-            modules: [
-              {
-                title: "Модуль 1: Основы",
-                lessons: [
-                  { title: "Урок 1: Алфавит и произношение", content: "Здесь будет контент урока..." },
-                  { title: "Урок 2: Приветствия и знакомство", content: "Здесь будет контент урока..." },
-                  { title: "Урок 3: Базовые фразы", content: "Здесь будет контент урока..." },
-                ]
-              },
-              {
-                title: "Модуль 2: Базовая грамматика",
-                lessons: [
-                  { title: "Урок 1: Существительные", content: "Здесь будет контент урока..." },
-                  { title: "Урок 2: Местоимения", content: "Здесь будет контент урока..." },
-                  { title: "Урок 3: Простые предложения", content: "Здесь будет контент урока..." },
-                ]
-              },
-              {
-                title: "Модуль 3: Разговорная практика",
-                lessons: [
-                  { title: "Урок 1: В магазине", content: "Здесь будет контент урока..." },
-                  { title: "Урок 2: В ресторане", content: "Здесь будет контент урока..." },
-                  { title: "Урок 3: Спрашиваем дорогу", content: "Здесь будет контент урока..." },
-                ]
-              }
-            ]
+            modules: courseDataFromArray.modules
           });
         }
       } catch (error) {
@@ -194,6 +357,23 @@ function CourseLearning() {
                 <h2>{course.modules[currentModule].lessons[currentLesson].title}</h2>
                 <div className="lesson-material">
                   {course.modules[currentModule].lessons[currentLesson].content}
+                  
+                  {course.modules[currentModule].lessons[currentLesson].video && (
+                    <div className="lesson-video">
+                      <h3>Видеоурок:</h3>
+                      <div className="video-container">
+                        <iframe 
+                          width="100%" 
+                          height="400" 
+                          src={course.modules[currentModule].lessons[currentLesson].video} 
+                          title={course.modules[currentModule].lessons[currentLesson].title}
+                          frameBorder="0" 
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                          allowFullScreen>
+                        </iframe>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="lesson-navigation">
                   <button 
