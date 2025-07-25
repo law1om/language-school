@@ -225,20 +225,32 @@ export function isAuthenticated() {
 
 export function getUserFromToken() {
   const token = localStorage.getItem('token');
+  console.log('Токен:', token); // Добавляем логирование
+
   if (!token) return null;
   
   try {
-    // Для JWT токенов - декодирование payload (середина токена)
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const payload = JSON.parse(window.atob(base64));
     
-    // Возвращаем данные пользователя непосредственно из payload
-    return {
+    // Добавляем проверку срока действия
+    const expDate = new Date(payload.exp * 1000);
+    console.log('Токен истекает:', expDate);
+    if (Date.now() >= payload.exp * 1000) {
+      console.log('Токен истёк!');
+      return null;
+    }
+    
+    // Добавляем логирование данных пользователя
+    const userData = {
       id: payload.userId,
       email: payload.email,
       role: payload.role
     };
+    console.log('Данные пользователя из токена:', userData);
+    
+    return userData;
   } catch (error) {
     console.error('Ошибка при расшифровке токена:', error);
     return null;
