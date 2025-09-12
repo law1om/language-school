@@ -9,7 +9,7 @@ export default defineConfig({
     compression()
   ],
   define: {
-    'process.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || 'https://language-school-72e9.onrender.com/api')
+    'import.meta.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || 'https://language-school-72e9.onrender.com/api')
   },
   server: {
     port: 5174,
