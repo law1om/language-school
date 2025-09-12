@@ -16,10 +16,7 @@ const PORT = process.env.PORT || 3001;
 app.use(helmet()); // Защита заголовков
 app.use(compression()); // Сжатие ответов
 app.use(express.json({ limit: '10kb' })); // Ограничение размера JSON
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5174',
-  credentials: true
-}));
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 // Ограничение количества запросов
 // const limiter = rateLimit({
