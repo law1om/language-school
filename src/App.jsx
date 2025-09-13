@@ -8,7 +8,7 @@ import 'swiper/css/pagination';
 import 'swiper/css/autoplay';
 import Assistant from './components/Assistant';
 import UserProfile from './components/UserProfile';
-import { register, login, setToken, getUserFromToken, removeToken } from './services/api';
+import { register, login, setToken, getUserFromToken, removeToken, API_URL } from './services/api';
 import { Route, Routes, Link, useNavigate, BrowserRouter } from 'react-router-dom';
 import CoursePage from './components/CoursePage';
 import CourseLearning from './components/CourseLearning';
@@ -25,7 +25,7 @@ function App() {
         const userData = getUserFromToken();
         if (userData) {
           try {
-            const response = await fetch('http://localhost:3001/api/auth/user', {
+            const response = await fetch(`${API_URL}/api/auth/user`, {
               method: 'GET',
               headers: {
                 'Content-Type': 'application/json',
@@ -404,7 +404,7 @@ const AuthModal = ({ onClose, onAuthSuccess }) => {
     useEffect(() => {
         const checkServerConnection = async () => {
             try {
-                const response = await fetch('http://localhost:3001/api/health', { 
+                const response = await fetch(`${API_URL}/api/health`, { 
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
